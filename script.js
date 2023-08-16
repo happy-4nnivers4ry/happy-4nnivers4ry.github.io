@@ -141,6 +141,8 @@ function startArkanoidGame() {
         display[paddle.y][paddle.x] = '=';
         display[paddle.y][paddle.x + 1] = '=';
         display[paddle.y][paddle.x + 2] = '=';
+        display[paddle.y][paddle.x + 3] = '=';
+        display[paddle.y][paddle.x + 4] = '=';
 
         // Draw bricks
         for (let brick of bricks) {
@@ -163,7 +165,7 @@ function startArkanoidGame() {
         if (ball.y <= 0) ball.dy = -ball.dy;
 
         // Ball collision with paddle
-        if (ball.y === paddle.y && ball.x >= paddle.x && ball.x <= paddle.x + 2) ball.dy = -ball.dy;
+        if (ball.y === paddle.y && ball.x >= paddle.x && ball.x <= paddle.x + 4) ball.dy = -ball.dy;
 
         // Ball collision with bricks
         for (let i = 0; i < bricks.length; i++) {
@@ -179,7 +181,7 @@ function startArkanoidGame() {
         }
 
         // Game over condition
-        if (ball.y >= height - 1) {
+        if (ball.y >= height) {
             clearInterval(gameInterval);
             startArkanoidGame();
         }
