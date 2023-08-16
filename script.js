@@ -48,8 +48,8 @@ function startSnakeGame() {
         if (d == "DOWN") snakeY += box;
 
         // Logic for the snake to go through walls
-        if (snakeX < 0) snakeX = canvas.width - box;
-        if (snakeY < 0) snakeY = canvas.height - box;
+        if (snakeX < -1) snakeX = canvas.width - box;
+        if (snakeY < -1) snakeY = canvas.height - box;
         if (snakeX >= canvas.width) snakeX = 0;
         if (snakeY >= canvas.height) snakeY = 0;
 
@@ -59,6 +59,8 @@ function startSnakeGame() {
                 x: Math.floor(Math.random() * 15) * box,
                 y: Math.floor(Math.random() * 15) * box
             };
+            clearInterval(game);  // Clear the current interval
+            game = setInterval(gameLoop, getSpeed());  // Set a new interval with adjusted speed
         } else {
             snake.pop();
         }
@@ -98,10 +100,6 @@ function startSnakeGame() {
         clearInterval(game);
         game = setInterval(gameLoop, getSpeed());
     }
-
-    // Clear any existing interval before starting a new game
-    clearInterval(game);
-    game = setInterval(gameLoop, getSpeed());
 }
 
 
