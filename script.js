@@ -1,10 +1,23 @@
 function checkSecretCode() {
-    const userInput = document.getElementById("secretCodeInput").value;
+    const userInput = document.getElementById("secretCodeInput").value.trim().toUpperCase();
     const outputElement = document.getElementById("outputMessage");
+    const randomResponses = ["keep trying", "nice try", "not that"];
+    
+    let message = "";
 
-    if (userInput === "ABCD") {
-        outputElement.innerText = "The secret answer is: OpenAI is cool!";
-    } else {
-        outputElement.innerText = "Wrong code!";
+    switch(userInput) {
+        case "PASSWORD1":
+            message = "ANSWER1";
+            break;
+        case "PASSWORD2":
+            message = "ANSWER2";
+            break;
+        case "PASSWORD3":
+            message = "ANSWER3";
+            break;
+        default:
+            message = randomResponses[Math.floor(Math.random() * randomResponses.length)];
     }
+    
+    outputElement.innerText = message;
 }
