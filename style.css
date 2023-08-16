@@ -1,6 +1,7 @@
 body {
     font-family: "Times New Roman", Times, serif;
     background-color: #FFFFCC;
+    background-image: url('background-tile.gif'); /* Placeholder for a tiled background image */
     margin: 0;
     padding: 0;
 }
@@ -8,4 +9,12 @@ body {
 a {
     color: blue;
     text-decoration: underline;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table td {
+    background-image: linear-gradient(to bottom right, #FFDDDD, #FFCCCC, #FFBBBB, #FFAAAA);
 }
