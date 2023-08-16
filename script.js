@@ -1,3 +1,5 @@
+let game;  // Declare the game interval variable outside the function to ensure it's accessible
+
 function startSnakeGame() {
     const canvas = document.getElementById('snakeGame');
     const context = canvas.getContext('2d');
@@ -10,10 +12,9 @@ function startSnakeGame() {
         y: Math.floor(Math.random() * 15) * box
     };
     let d;
-    
-    // New: Speed calculation
+
     function getSpeed() {
-        return Math.max(100 - (snake.length * 2), 50);  // Decrement time by 2ms for each segment, but not less than 50ms
+        return Math.max(100 - (snake.length * 2), 50);
     }
 
     document.addEventListener("keydown", direction);
@@ -46,9 +47,9 @@ function startSnakeGame() {
         if (d == "RIGHT") snakeX += box;
         if (d == "DOWN") snakeY += box;
 
-        // New: Logic for the snake to go through walls
-        if (snakeX <= 0) snakeX = canvas.width - box;
-        if (snakeY <= 0) snakeY = canvas.height - box;
+        // Logic for the snake to go through walls
+        if (snakeX < 0) snakeX = canvas.width - box;
+        if (snakeY < 0) snakeY = canvas.height - box;
         if (snakeX >= canvas.width) snakeX = 0;
         if (snakeY >= canvas.height) snakeY = 0;
 
@@ -88,14 +89,21 @@ function startSnakeGame() {
             document.getElementById("outputMessage").innerText = "ANSWER2";
             canvas.style.display = 'none';
         }
-        
-        // New: Adjust game speed based on snake's size
-        clearInterval(game);
-        game = setInterval(draw, getSpeed());
     }
 
-    let game = setInterval(draw, getSpeed());
+    function gameLoop() {
+        draw();
+
+        // Adjust the game speed here
+        clearInterval(game);
+        game = setInterval(gameLoop, getSpeed());
+    }
+
+    // Clear any existing interval before starting a new game
+    clearInterval(game);
+    game = setInterval(gameLoop, getSpeed());
 }
+
 
 function startArkanoidGame() {
     const gameElement = document.getElementById('arkanoidGame');
