@@ -1,18 +1,21 @@
 function checkSecretCode() {
     const userInput = document.getElementById("secretCodeInput").value.trim().toUpperCase();
     const outputElement = document.getElementById("outputMessage");
-    const randomResponses = ["keep trying", "nice try", "not that"];
+    const randomResponses = ["nop", "casi", "eso no", "segui intentando",
+                             "posta, no te va a salir por fuerza bruta", "dale, juga en serio",
+                             "no se supone que puedas adivinar", "no", "eso tampoco", "jaja no eso no",
+                            "ninguna de estas respuestas te da una pista", "bueno ok el primer codigo es `MAÑANA`, no, mentira"];
     
     let message = "";
 
     switch(userInput) {
-        case "PASSWORD1":
+        case "DOS MAÑANAS":
             message = "ANSWER1";
             break;
-        case "PASSWORD2":
+        case "CATORCE AYERES":
             message = "ANSWER2";
             break;
-        case "PASSWORD3":
+        case "CODIGO SUPER SECRETO":
             message = "ANSWER3";
             break;
         default:
