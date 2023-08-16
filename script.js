@@ -123,8 +123,8 @@ function startArkanoidGame() {
     ];
 
     document.addEventListener("keydown", function(event) {
-        if (event.keyCode == 37) paddle.dx = -1;
-        if (event.keyCode == 39) paddle.dx = 1;
+        if (event.keyCode == 37) paddle.dx = -2;
+        if (event.keyCode == 39) paddle.dx = 2;
     });
 
     document.addEventListener("keyup", function(event) {
