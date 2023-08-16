@@ -88,7 +88,7 @@ function startSnakeGame() {
 
         if(score == 10) {
             clearInterval(game);
-            document.getElementById("outputMessage").innerText = "ANSWER2";
+            document.getElementById("outputMessage").innerText = "El siguiente tesoro está en Vollspark Fshain. Si usás la entrada de Danziger Straße, vas a ver un camino que te permite caminar de manera totalmente recta. Seguilo hasta que se termine. El tesoro va a estar a cinco metros de donde se termina, en el suelo.";
             canvas.style.display = 'none';
         }
     }
@@ -190,7 +190,7 @@ function startArkanoidGame() {
         if (bricks.length === 0) {
             clearInterval(gameInterval);
             gameElement.style.display = 'none';
-            document.getElementById("outputMessage").innerText = "ANSWER3";
+            document.getElementById("outputMessage").innerText = "El último tesoro está muy cerca...de casa. Bajá, y caminá por el jardín interno del edificio. El tesoro está en el piso, escondido debajo de unas piedras.";
         }
     }
 
@@ -216,7 +216,7 @@ function checkSecretCode() {
 
     switch(userInput) {
         case "DOS MAÑANAS":
-            message = "ANSWER1";
+            message = "El siguiente tesoro está en Vollskark Prenzlauer Berg. Si vas a la parada del M5, vas a ver un camino de tierra que empieza muy, muy angosto, que te lleva al parque. Seguí por el camino de tierra hasta que se termine. Ahí, a tu derecha, entre los arbustos y los árboles, está el segundo tesoro.";
             break;
         case "TRES AYERES":
             document.getElementById('snakeGame').style.display = 'block';
@@ -236,5 +236,5 @@ function checkSecretCode() {
 
 function showHint() {
     const hintElement = document.getElementById("hintMessage");
-    hintElement.innerText = "This is your first hint: [PLACEHOLDER]";
+    hintElement.innerText = "El primer tesoro está en el parque que no te gusta que tiene un lago chiquito. Si caminás alrededor del agua, cerca de dos bancos gigantes hay un árbol trillizo. El tesoro está escondido dentro del árbol.";
 }
