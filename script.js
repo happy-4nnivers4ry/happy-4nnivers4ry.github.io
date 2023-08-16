@@ -10,6 +10,11 @@ function startSnakeGame() {
         y: Math.floor(Math.random() * 15) * box
     };
     let d;
+    
+    // New: Speed calculation
+    function getSpeed() {
+        return Math.max(100 - (snake.length * 2), 50);  // Decrement time by 2ms for each segment, but not less than 50ms
+    }
 
     document.addEventListener("keydown", direction);
 
@@ -41,6 +46,12 @@ function startSnakeGame() {
         if (d == "RIGHT") snakeX += box;
         if (d == "DOWN") snakeY += box;
 
+        // New: Logic for the snake to go through walls
+        if (snakeX < 0) snakeX = canvas.width - box;
+        if (snakeY < 0) snakeY = canvas.height - box;
+        if (snakeX >= canvas.width) snakeX = 0;
+        if (snakeY >= canvas.height) snakeY = 0;
+
         if (snakeX == food.x && snakeY == food.y) {
             score++;
             food = {
@@ -65,7 +76,7 @@ function startSnakeGame() {
             return false;
         }
 
-        if (snakeX < 0 || snakeY < 0 || snakeX >= canvas.width || snakeY >= canvas.height || collision(newHead, snake)) {
+        if (collision(newHead, snake)) {
             clearInterval(game);
             startSnakeGame();
         }
@@ -77,9 +88,13 @@ function startSnakeGame() {
             document.getElementById("outputMessage").innerText = "ANSWER2";
             canvas.style.display = 'none';
         }
+        
+        // New: Adjust game speed based on snake's size
+        clearInterval(game);
+        game = setInterval(draw, getSpeed());
     }
 
-    let game = setInterval(draw, 100);
+    let game = setInterval(draw, getSpeed());
 }
 
 
