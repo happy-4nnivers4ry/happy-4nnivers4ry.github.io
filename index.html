@@ -18,6 +18,12 @@
                 <button onclick="checkSecretCode()" style="font-family: 'Comic Sans MS'; background-color: yellow; padding: 10px; border: 2px solid blue; cursor: pointer;">Check Code</button>
                 <br><br>
                 <p id="outputMessage" style="font-family: 'Comic Sans MS'; color: green;"></p>
+                
+                <!-- Invisible Div -->
+                <div id="invisibleHintDiv" onclick="showHint()" style="width: 50px; height: 50px; position: absolute; top: 10px; left: 10px;"></div>
+                
+                <!-- Hint Placeholder -->
+                <p id="hintMessage" style="font-family: 'Comic Sans MS'; color: purple;"></p>
             </td>
         </tr>
     </table>
