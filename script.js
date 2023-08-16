@@ -21,3 +21,9 @@ function checkSecretCode() {
     
     outputElement.innerText = message;
 }
+
+
+function showHint() {
+    const hintElement = document.getElementById("hintMessage");
+    hintElement.innerText = "This is your first hint: [PLACEHOLDER]";
+}
