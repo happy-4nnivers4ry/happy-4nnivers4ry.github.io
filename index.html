@@ -3,15 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secret Code Checker</title>
+    <title>Treasure Hunt 2000!</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Enter the Secret Code</h1>
-    <input type="text" id="secretCodeInput" placeholder="Enter secret code">
-    <button onclick="checkSecretCode()">Check Code</button>
-    <p id="outputMessage"></p>
+    <table width="100%" height="100%" cellpadding="10" cellspacing="0" border="1">
+        <tr>
+            <td bgcolor="#FFDDDD" align="center" valign="middle">
+                <font face="Comic Sans MS" size="6" color="blue">Welcome to the Treasure Hunt!</font>
+                <marquee><font face="Comic Sans MS" size="4" color="red">Enter the Secret Code below and discover the treasure!</font></marquee>
+                <br><br>
+                <input type="text" id="secretCodeInput" placeholder="Enter secret code here..." style="font-family: 'Comic Sans MS'; padding: 5px;">
+                <br><br>
+                <button onclick="checkSecretCode()" style="font-family: 'Comic Sans MS'; background-color: yellow; padding: 10px; border: 2px solid blue; cursor: pointer;">Check Code</button>
+                <br><br>
+                <p id="outputMessage" style="font-family: 'Comic Sans MS'; color: green;"></p>
+            </td>
+        </tr>
+    </table>
 
-    <!-- Link to the external JavaScript file -->
     <script src="script.js"></script>
 </body>
 </html>
