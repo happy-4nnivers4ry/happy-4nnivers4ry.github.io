@@ -1,6 +1,7 @@
 let game;  // Declare the game interval variable outside the function to ensure it's accessible
 
 function startSnakeGame() {
+    console.log("Starting Snake Game..."); // Debugging line
     const canvas = document.getElementById('snakeGame');
     const context = canvas.getContext('2d');
     const box = 20;
