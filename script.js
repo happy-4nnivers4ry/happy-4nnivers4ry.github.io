@@ -89,7 +89,6 @@ function startSnakeGame() {
         if (collision(newHead, snake)) {
             clearInterval(game);
             startSnakeGame();
-            return;  // This ensures that the gameLoop doesn't continue executing after a restart
         }
 
         snake.unshift(newHead);
