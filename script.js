@@ -28,6 +28,7 @@ function startSnakeGame() {
     }
 
     function draw() {
+        console.log("Drawing on canvas");  // Debugging line
         context.clearRect(0, 0, canvas.width, canvas.height);
 
         for (let i = 0; i < snake.length; i++) {
@@ -39,6 +40,7 @@ function startSnakeGame() {
 
         context.fillStyle = "red";
         context.fillRect(food.x, food.y, box, box);
+        console.log("Snake Head Position:", snake[0].x, snake[0].y);  // Debugging line
 
         let snakeX = snake[0].x;
         let snakeY = snake[0].y;
