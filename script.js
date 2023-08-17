@@ -217,9 +217,11 @@ function checkSecretCode() {
 
     switch(userInput) {
         case "DOS MAÑANAS":
+            console.log("dos mananas..."); // Debugging line
             message = "El siguiente tesoro está en Vollskark Prenzlauer Berg. Si vas a la parada del M5, vas a ver un camino de tierra que empieza muy, muy angosto, que te lleva al parque. Seguí por el camino de tierra hasta que se termine. Ahí, a tu derecha, entre los arbustos y los árboles, está el segundo tesoro.";
             break;
         case "TRES AYERES":
+            console.log("getting snake game..."); // Debugging line
             document.getElementById('snakeGame').style.display = 'block';
             startSnakeGame();
             break;
