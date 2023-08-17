@@ -112,6 +112,7 @@ function startSnakeGame() {
         game = setInterval(gameLoop, getSpeed());
         console.log("Starting Snake Game 8..."); // Debugging line
     }
+    const gameInterval = setInterval(gameLoop, 100);
 }
 
 
