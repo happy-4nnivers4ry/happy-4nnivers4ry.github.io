@@ -102,6 +102,7 @@ function startSnakeGame() {
             clearInterval(game);
             document.getElementById("outputMessage").innerText = "El siguiente tesoro está en Vollspark Fshain. Si usás la entrada de Danziger Straße, vas a ver un camino que te permite caminar de manera totalmente recta. Seguilo hasta que se termine. El tesoro va a estar a cinco metros de donde se termina, en el suelo.";
             canvas.style.display = 'none';
+            score = 0;
         }
     }
 
