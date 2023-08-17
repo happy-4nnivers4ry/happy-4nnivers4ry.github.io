@@ -229,6 +229,8 @@ function checkSecretCode() {
     const randomResponses = ["nop", "casi", "eso no", "segui intentando",
                              "posta, no te va a salir por fuerza bruta", "dale, juga en serio",
                              "no se supone que puedas adivinar", "no", "eso tampoco", "jaja no eso no",
+                             "error", "dale, tenés que ir a buscar el tesoro primero y eso te da la siguiente pista",
+                             "probá en mayúsculas", "ya está, se acabaron los easter eggs",
                             "ninguna de estas respuestas te da una pista", "bueno ok el primer codigo es `MAÑANA`, no, mentira"];
     
     let message = "";
