@@ -13,9 +13,11 @@
                 <font face="Comic Sans MS" size="6" color="blue">Welcome to the <blink>Treasure Hunt!</blink></font>
                 <marquee><font face="Comic Sans MS" size="4" color="red">Enter the Secret Code below to discover the treasure! The first hint is hidden somewhere in this page</font></marquee>
                 <br><br>
-                <input type="text" id="secretCodeInput" placeholder="Enter secret code here..." style="font-family: 'Comic Sans MS'; padding: 5px;">
-                <br><br>
-                <button onclick="checkSecretCode()" style="font-family: 'Comic Sans MS'; background-color: yellow; padding: 10px; border: 2px solid blue; cursor: pointer;">Check Code</button>
+                <form onsubmit="checkSecretCode(event)">
+                    <input type="text" id="secretCodeInput" placeholder="Enter secret code here..." style="font-family: 'Comic Sans MS'; padding: 5px;">
+                    <br><br>
+                    <button onclick="checkSecretCode()" style="font-family: 'Comic Sans MS'; background-color: yellow; padding: 10px; border: 2px solid blue; cursor: pointer;">Check Code</button>
+                </form>
                 <br><br>
                 <p id="outputMessage" style="font-family: 'Comic Sans MS'; color: green;"></p>
                 
