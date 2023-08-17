@@ -87,8 +87,13 @@ function startSnakeGame() {
         }
 
         if (collision(newHead, snake)) {
-            clearInterval(game);
-            startSnakeGame();
+            clearInterval(game);  // 1. Clear the current interval
+            snake = [];           // 2. Reset the snake array
+            snake[0] = { x: 10 * box, y: 10 * box };  // 2. (continued)
+            score = 0;            // 3. Reset the score
+            d = undefined;        // 4. Reset the direction
+            game = setInterval(gameLoop, 100);  // 5. Start the game loop again with normal speed
+            return;  // Exit the current game loop iteration
         }
 
         snake.unshift(newHead);
