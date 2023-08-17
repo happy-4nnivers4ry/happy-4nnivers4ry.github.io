@@ -13,12 +13,14 @@ function startSnakeGame() {
         y: Math.floor(Math.random() * 15) * box
     };
     let d;
+    console.log("Starting Snake Game 2..."); // Debugging line
 
     function getSpeed() {
         return Math.max(100 - (snake.length * 2), 50);
     }
 
     document.addEventListener("keydown", direction);
+    console.log("Starting Snake Game 3..."); // Debugging line
 
     function direction(event) {
         if (event.keyCode == 37 && d != "RIGHT") d = "LEFT";
@@ -26,6 +28,8 @@ function startSnakeGame() {
         if (event.keyCode == 39 && d != "LEFT") d = "RIGHT";
         if (event.keyCode == 40 && d != "UP") d = "DOWN";
     }
+
+    console.log("Starting Snake Game 4..."); // Debugging line
 
     function draw() {
         console.log("Drawing on canvas");  // Debugging line
@@ -96,12 +100,17 @@ function startSnakeGame() {
         }
     }
 
+    console.log("Starting Snake Game 5..."); // Debugging line
+
     function gameLoop() {
         draw();
+        console.log("Starting Snake Game 6..."); // Debugging line
 
         // Adjust the game speed here
         clearInterval(game);
+        console.log("Starting Snake Game 7..."); // Debugging line
         game = setInterval(gameLoop, getSpeed());
+        console.log("Starting Snake Game 8..."); // Debugging line
     }
 }
 
@@ -223,7 +232,7 @@ function checkSecretCode() {
             message = "El siguiente tesoro está en Vollskark Prenzlauer Berg. Si vas a la parada del M5, vas a ver un camino de tierra que empieza muy, muy angosto, que te lleva al parque. Seguí por el camino de tierra hasta que se termine. Ahí, a tu derecha, entre los arbustos y los árboles, está el segundo tesoro.";
             break;
         case "TRES AYERES":
-            console.log("getting snake game..."); // Debugging line
+            console.log("getting snake game 2..."); // Debugging line
             document.getElementById('snakeGame').style.display = 'block';
             startSnakeGame();
             break;
