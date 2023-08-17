@@ -224,6 +224,7 @@ function startArkanoidGame() {
 
 
 function checkSecretCode() {
+    event.preventDefault();
     const userInput = document.getElementById("secretCodeInput").value.trim().toUpperCase();
     const outputElement = document.getElementById("outputMessage");
     const randomResponses = ["nop", "casi", "eso no", "segui intentando",
