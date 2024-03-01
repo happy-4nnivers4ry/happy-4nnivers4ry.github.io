@@ -15,8 +15,8 @@ let bulletCount = 1;
 let score = 0;
 
 function addEnemy() {
-    const maxEnemySize = Math.min(10 + score, 60);  // Linear growth, capped at 60
-    const enemySize = Math.random() * (maxEnemySize - 10) + 10;  // Minimum size of 10
+    const maxEnemySize = Math.min(10 + score, 60);
+    const enemySize = Math.random() * (maxEnemySize - 10) + 10;
     const enemyPositionX = Math.random() * (canvas.width - enemySize);
     enemies.push({
         x: enemyPositionX,
@@ -31,19 +31,6 @@ function addPowerUp() {
     const colors = ['yellow', 'orange', 'purple'];
     const color = colors[Math.floor(Math.random() * colors.length)];
     powerUps.push({ x: powerUpX, y: -15, width: 15, height: 15, color: color });
-}
-
-function shootBullet() {
-    let angleOffset = (bulletCount > 1) ? Math.PI / (4 * (bulletCount - 1)) : 0;
-    for (let i = 0; i < bulletCount; i++) {
-        let angle = -Math.PI / 2 + (i * angleOffset) - ((bulletCount - 1) * angleOffset) / 2;
-        bullets.push({
-            x: playerX + playerWidth / 2 - 2.5,
-            y: playerY,
-            speed: 5,
-            angle: angle
-        });
-    }
 }
 
 function updateGame() {
@@ -102,7 +89,7 @@ function updateGame() {
     });
 
     // Enemies logic
-    if (Math.random() < 0.02) { // Adjust enemy spawn rate
+    if (Math.random() < 0.02) {
         addEnemy();
     }
 
@@ -123,6 +110,10 @@ function updateGame() {
     });
 
     // Power-ups logic
+    if (Math.random() < 0.1) { // Increased chance for demonstration
+        addPowerUp();
+    }
+
     powerUps.forEach((powerUp, index) => {
         powerUp.y += 1;
         ctx.fillStyle = powerUp.color;
@@ -142,6 +133,19 @@ function updateGame() {
     });
 
     requestAnimationFrame(updateGame);
+}
+
+function shootBullet() {
+    let angleOffset = (bulletCount > 1) ? Math.PI / (4 * (bulletCount - 1)) : 0;
+    for (let i = 0; i < bulletCount; i++) {
+        let angle = -Math.PI / 2 + (i * angleOffset) - ((bulletCount - 1) * angleOffset) / 2;
+        bullets.push({
+            x: playerX + playerWidth / 2 - 2.5,
+            y: playerY,
+            speed: 5,
+            angle: angle
+        });
+    }
 }
 
 document.addEventListener('keydown', (event) => {
