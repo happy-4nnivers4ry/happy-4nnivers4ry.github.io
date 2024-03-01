@@ -14,10 +14,9 @@ let playerMoveSpeed = 10;
 let bulletCount = 1;
 let score = 0;
 const minEnemySize = 10;
-const maxScore = 100; // Set maximum score to 100
+const maxScore = 100;
 
 function addEnemy() {
-    // Linear growth of max enemy size with score, capped at 60
     const maxEnemySize = Math.min(10 + score, 60);
     const enemySize = Math.random() * (maxEnemySize - 10) + 10;
     const enemyPositionX = Math.random() * (canvas.width - enemySize);
@@ -56,7 +55,7 @@ function updateGame() {
         shootTimer--;
     }
 
-    // Update bullets
+    // Bullets logic
     bullets.forEach((bullet, index) => {
         bullet.x += bullet.speed * Math.cos(bullet.angle);
         bullet.y += bullet.speed * Math.sin(bullet.angle);
@@ -71,14 +70,15 @@ function updateGame() {
 
         // Check for bullet collision with enemies
         enemies.forEach((enemy, enemyIndex) => {
-            if (bullet.x >= enemy.x && bullet.x <= enemy.x + enemy.size && bullet.y <= enemy.y + enemy.size && bullet.y >= enemy.y) {
+            if (bullet.x >= enemy.x && bullet.x <= enemy.x + enemy.size &&
+                bullet.y <= enemy.y + enemy.size && bullet.y >= enemy.y) {
                 bullets.splice(index, 1);
                 enemy.size -= enemy.originalSize * 0.1; // Reduce size
                 if (enemy.size < minEnemySize) {
                     enemies.splice(enemyIndex, 1);
                     score++;
-                    if (score >= 1000) {
-                        alert("Congratulations! You've reached a score of 1000!");
+                    if (score >= maxScore) {
+                        alert("Congratulations! You've reached the maximum score!");
                         window.location.reload();
                     }
                 }
@@ -91,12 +91,17 @@ function updateGame() {
     });
 
     // Update enemies
+    if (Math.random() < 0.1) { // Adjust spawn rate as needed
+        addEnemy();
+    }
+
     enemies.forEach((enemy, index) => {
         enemy.y += 2;
         ctx.fillStyle = 'green';
         ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
 
-        if (enemy.y + enemy.size > playerY && enemy.x < playerX + playerWidth && enemy.x + enemy.size > playerX && enemy.y < playerY + playerHeight) {
+        if (enemy.y + enemy.size > playerY && enemy.x < playerX + playerWidth &&
+            enemy.x + enemy.size > playerX && enemy.y < playerY + playerHeight) {
             alert("Game Over");
             window.location.reload();
         }
@@ -112,7 +117,8 @@ function updateGame() {
         ctx.fillStyle = powerUp.color;
         ctx.fillRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
 
-        if (powerUp.x < playerX + playerWidth && powerUp.x + powerUp.width > playerX && powerUp.y + powerUp.height > playerY && powerUp.y < playerY + playerHeight) {
+        if (powerUp.x < playerX + playerWidth && powerUp.x + powerUp.width > playerX &&
+            powerUp.y + powerUp.height > playerY && powerUp.y < playerY + playerHeight) {
             powerUps.splice(index, 1);
             if (powerUp.color === 'yellow') {
                 shootInterval = Math.max(5, shootInterval - 2);
@@ -128,9 +134,12 @@ function updateGame() {
 }
 
 function shootBullet() {
-    let angleOffset = (bulletCount - 1) * Math.PI / 16; // Adjust angle spread based on bullet count
+    let angleOffset = Math.PI / 4; // 45 degrees in radians for bullet spread
     for (let i = 0; i < bulletCount; i++) {
-        let angle = -Math.PI / 2 - angleOffset + (i * 2 * angleOffset) / (bulletCount - 1 || 1);
+        let angle = -Math.PI / 2; // Default angle to shoot straight up
+        if (bulletCount > 1) {
+            angle += angleOffset * (i - (bulletCount - 1) / 2);
+        }
         bullets.push({
             x: playerX + playerWidth / 2 - 2.5,
             y: playerY,
