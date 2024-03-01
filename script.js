@@ -8,8 +8,7 @@ let bullets = [];
 let enemies = [];
 let powerUps = [];
 let shootInterval = 15;
-let shootTimer = 0;
-let isShooting = false; // Flag to check if spacebar is pressed
+let shootTimer = shootInterval; // Start with the ability to shoot immediately
 
 function addEnemy() {
     const enemyPositionX = Math.random() * (canvas.width - 30);
@@ -28,11 +27,11 @@ function updateGame() {
     ctx.fillStyle = 'blue';
     ctx.fillRect(playerX, canvas.height - 20, playerWidth, playerHeight);
 
-    // Continuous shooting
-    if (isShooting && shootTimer <= 0) {
+    // Shooting logic
+    if (shootTimer <= 0) {
         shootBullet();
-        shootTimer = shootInterval;
-    } else if (shootTimer > 0) {
+        shootTimer = shootInterval; // Reset shoot timer after shooting
+    } else {
         shootTimer--;
     }
 
@@ -66,7 +65,6 @@ function updateGame() {
         ctx.fillRect(enemy.x, enemy.y, 30, 30);
 
         if (enemy.y + 30 > canvas.height - 20 && enemy.x < playerX + playerWidth && enemy.x + 30 > playerX) {
-            // Game over
             alert("Game Over");
             window.location.reload(); // Reset the game
             return;
@@ -89,7 +87,7 @@ function updateGame() {
 
         if (powerUp.x < playerX + playerWidth && powerUp.x + powerUp.width > playerX && powerUp.y + powerUp.height > canvas.height - 20 && powerUp.y < canvas.height) {
             powerUps.splice(index, 1);
-            shootInterval = Math.max(5, shootInterval - 2);
+            shootInterval = Math.max(5, shootInterval - 2); // Increase shooting speed
         }
     });
 
@@ -105,14 +103,6 @@ document.addEventListener('keydown', (event) => {
         playerX -= 10;
     } else if (event.key === 'ArrowRight' && playerX < canvas.width - playerWidth) {
         playerX += 10;
-    } else if (event.key === ' ') {
-        isShooting = true;
-    }
-});
-
-document.addEventListener('keyup', (event) => {
-    if (event.key === ' ') {
-        isShooting = false;
     }
 });
 
