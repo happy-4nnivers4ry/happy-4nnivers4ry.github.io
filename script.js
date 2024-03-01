@@ -145,7 +145,7 @@ function updateGame() {
     });
 
     // Power-ups logic
-    if (Math.random() < 0.01) { // Increased chance for demonstration
+    if (Math.random() < 0.007) { // Increased chance for demonstration
         addPowerUp();
     }
 
