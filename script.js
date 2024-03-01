@@ -75,7 +75,7 @@ function updateGame() {
                 if (enemy.size < 10) {
                     enemies.splice(enemyIndex, 1);
                     score++;
-                    if (score >= 100) {
+                    if (score >= 1000) {
                         alert("Congratulations! You've reached the maximum score!");
                         window.location.reload();
                     }
