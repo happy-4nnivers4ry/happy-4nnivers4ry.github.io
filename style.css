@@ -1,20 +1,12 @@
 body {
-    font-family: "Times New Roman", Times, serif;
-    background-color: #FFFFCC;
-    background-image: url('https://media.tenor.com/h5ED2wOLuQ4AAAAC/nice-castlevania-symphony-of-the-night.gif'); /* Placeholder for a tiled background image */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #000;
     margin: 0;
-    padding: 0;
 }
 
-a {
-    color: blue;
-    text-decoration: underline;
-}
-
-table {
-    border-collapse: collapse;
-}
-
-table td {
-    background-image: linear-gradient(to bottom right, #FFDDDD, #FFCCCC, #FFBBBB, #FFAAAA);
+canvas {
+    background-color: #111;
 }
