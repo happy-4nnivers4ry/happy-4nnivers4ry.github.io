@@ -88,8 +88,34 @@ function updateGame() {
         }
     });
 
+    prob_add_enemy = 0.02
+    if (score > 10) {
+        prob_add_enemy = 0.04
+    }
+
+    if (score > 20) {
+        prob_add_enemy = 0.8
+    }
+
+    if (score > 30) {
+        prob_add_enemy = 0.1
+    }
+
+    if (score > 50) {
+        prob_add_enemy = 0.2
+    }
+
+    if (score > 80) {
+        prob_add_enemy = 0.4
+    }
+
+    if (score > 90) {
+        prob_add_enemy = 0.8
+    }
+
+
     // Enemies logic
-    if (Math.random() < 0.02) {
+    if (Math.random() < prob_add_enemy) {
         addEnemy();
     }
 
