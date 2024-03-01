@@ -14,9 +14,11 @@ let playerMoveSpeed = 10;
 let bulletCount = 1;
 let score = 0;
 const minEnemySize = 10;
+const maxScore = 100; // Set maximum score to 100
 
 function addEnemy() {
-    const maxEnemySize = Math.min(60, 10 + Math.sqrt(score));
+    // Linear growth of max enemy size with score, capped at 60
+    const maxEnemySize = Math.min(10 + score, 60);
     const enemySize = Math.random() * (maxEnemySize - 10) + 10;
     const enemyPositionX = Math.random() * (canvas.width - enemySize);
     enemies.push({
