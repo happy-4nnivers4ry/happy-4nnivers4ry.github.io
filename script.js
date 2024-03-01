@@ -157,7 +157,7 @@ function updateGame() {
             powerUp.y + powerUp.height > playerY && powerUp.y < playerY + playerHeight) {
             powerUps.splice(index, 1);
             if (powerUp.color === 'yellow') {
-                shootInterval = Math.max(5, shootInterval - 2);
+                shootInterval = Math.max(1, shootInterval - 2);
             } else if (powerUp.color === 'orange') {
                 playerMoveSpeed += 2;
             } else if (powerUp.color === 'purple') {
