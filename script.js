@@ -15,7 +15,7 @@ let bulletCount = 1;
 let score = 0;
 
 function addEnemy() {
-    const maxEnemySize = Math.min(10 + score * 3, 150);
+    const maxEnemySize = Math.min(10 + score * 3, 1000);
     const enemySize = Math.random() * (maxEnemySize - 10) + 10;
     const enemyPositionX = Math.random() * (canvas.width - enemySize);
     enemies.push({
@@ -110,7 +110,7 @@ function updateGame() {
     }
 
     if (score > 90) {
-        prob_add_enemy = 0.8
+        prob_add_enemy = 0.9
     }
 
 
@@ -136,7 +136,7 @@ function updateGame() {
     });
 
     // Power-ups logic
-    if (Math.random() < 0.01) { // Increased chance for demonstration
+    if (Math.random() < 0.004) { // Increased chance for demonstration
         addPowerUp();
     }
 
