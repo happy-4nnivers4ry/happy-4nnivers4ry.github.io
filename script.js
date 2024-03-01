@@ -13,12 +13,10 @@ let shootTimer = shootInterval;
 let playerMoveSpeed = 10;
 let bulletCount = 1;
 let score = 0;
-const minEnemySize = 10;
-const maxScore = 100;
 
 function addEnemy() {
-    const maxEnemySize = Math.min(10 + score, 60);
-    const enemySize = Math.random() * (maxEnemySize - 10) + 10;
+    const maxEnemySize = Math.min(10 + score, 60);  // Linear growth, capped at 60
+    const enemySize = Math.random() * (maxEnemySize - 10) + 10;  // Minimum size of 10
     const enemyPositionX = Math.random() * (canvas.width - enemySize);
     enemies.push({
         x: enemyPositionX,
@@ -33,6 +31,19 @@ function addPowerUp() {
     const colors = ['yellow', 'orange', 'purple'];
     const color = colors[Math.floor(Math.random() * colors.length)];
     powerUps.push({ x: powerUpX, y: -15, width: 15, height: 15, color: color });
+}
+
+function shootBullet() {
+    let angleOffset = (bulletCount > 1) ? Math.PI / (4 * (bulletCount - 1)) : 0;
+    for (let i = 0; i < bulletCount; i++) {
+        let angle = -Math.PI / 2 + (i * angleOffset) - ((bulletCount - 1) * angleOffset) / 2;
+        bullets.push({
+            x: playerX + playerWidth / 2 - 2.5,
+            y: playerY,
+            speed: 5,
+            angle: angle
+        });
+    }
 }
 
 function updateGame() {
@@ -74,10 +85,10 @@ function updateGame() {
                 bullet.y <= enemy.y + enemy.size && bullet.y >= enemy.y) {
                 bullets.splice(index, 1);
                 enemy.size -= enemy.originalSize * 0.1; // Reduce size
-                if (enemy.size < minEnemySize) {
+                if (enemy.size < 10) {
                     enemies.splice(enemyIndex, 1);
                     score++;
-                    if (score >= maxScore) {
+                    if (score >= 100) {
                         alert("Congratulations! You've reached the maximum score!");
                         window.location.reload();
                     }
@@ -90,8 +101,8 @@ function updateGame() {
         }
     });
 
-    // Update enemies
-    if (Math.random() < 0.1) { // Adjust spawn rate as needed
+    // Enemies logic
+    if (Math.random() < 0.02) { // Adjust enemy spawn rate
         addEnemy();
     }
 
@@ -111,7 +122,7 @@ function updateGame() {
         }
     });
 
-    // Update power-ups
+    // Power-ups logic
     powerUps.forEach((powerUp, index) => {
         powerUp.y += 1;
         ctx.fillStyle = powerUp.color;
@@ -131,22 +142,6 @@ function updateGame() {
     });
 
     requestAnimationFrame(updateGame);
-}
-
-function shootBullet() {
-    let angleOffset = Math.PI / 4; // 45 degrees in radians for bullet spread
-    for (let i = 0; i < bulletCount; i++) {
-        let angle = -Math.PI / 2; // Default angle to shoot straight up
-        if (bulletCount > 1) {
-            angle += angleOffset * (i - (bulletCount - 1) / 2);
-        }
-        bullets.push({
-            x: playerX + playerWidth / 2 - 2.5,
-            y: playerY,
-            speed: 5,
-            angle: angle
-        });
-    }
 }
 
 document.addEventListener('keydown', (event) => {
