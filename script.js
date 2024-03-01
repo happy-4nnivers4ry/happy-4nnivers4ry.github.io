@@ -4,11 +4,12 @@ const ctx = canvas.getContext('2d');
 let playerX = canvas.width / 2;
 let playerWidth = 30;
 let playerHeight = 30;
+let playerSpeed = 10; // Initial player speed
 let bullets = [];
 let enemies = [];
 let powerUps = [];
 let shootInterval = 15;
-let shootTimer = shootInterval; // Start with the ability to shoot immediately
+let shootTimer = shootInterval;
 
 function addEnemy() {
     const enemyPositionX = Math.random() * (canvas.width - 30);
@@ -17,7 +18,8 @@ function addEnemy() {
 
 function addPowerUp() {
     const powerUpX = Math.random() * (canvas.width - 15);
-    powerUps.push({ x: powerUpX, y: -15, width: 15, height: 15 });
+    const powerUpType = 'orange'; // For now, all power-ups are orange
+    powerUps.push({ x: powerUpX, y: -15, width: 15, height: 15, type: powerUpType });
 }
 
 function updateGame() {
@@ -30,7 +32,7 @@ function updateGame() {
     // Shooting logic
     if (shootTimer <= 0) {
         shootBullet();
-        shootTimer = shootInterval; // Reset shoot timer after shooting
+        shootTimer = shootInterval;
     } else {
         shootTimer--;
     }
@@ -85,25 +87,4 @@ function updateGame() {
         ctx.fillStyle = 'yellow';
         ctx.fillRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
 
-        if (powerUp.x < playerX + playerWidth && powerUp.x + powerUp.width > playerX && powerUp.y + powerUp.height > canvas.height - 20 && powerUp.y < canvas.height) {
-            powerUps.splice(index, 1);
-            shootInterval = Math.max(5, shootInterval - 2); // Increase shooting speed
-        }
-    });
-
-    requestAnimationFrame(updateGame);
-}
-
-function shootBullet() {
-    bullets.push({ x: playerX + 12.5, y: canvas.height - 20 });
-}
-
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowLeft' && playerX > 0) {
-        playerX -= 10;
-    } else if (event.key === 'ArrowRight' && playerX < canvas.width - playerWidth) {
-        playerX += 10;
-    }
-});
-
-updateGame();
+        if (powerUp.x < playerX + playerWidth && powerUp.x + powerUp.width > playerX && powerUp.y + powerUp.height > canvas.height - 
