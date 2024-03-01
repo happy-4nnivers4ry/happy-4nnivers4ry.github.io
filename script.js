@@ -4,12 +4,12 @@ const ctx = canvas.getContext('2d');
 let playerX = canvas.width / 2;
 let playerWidth = 30;
 let playerHeight = 30;
-let playerSpeed = 10; // Initial player speed
 let bullets = [];
 let enemies = [];
 let powerUps = [];
 let shootInterval = 15;
 let shootTimer = shootInterval;
+let playerMoveSpeed = 10; // Initial player movement speed
 
 function addEnemy() {
     const enemyPositionX = Math.random() * (canvas.width - 30);
@@ -17,9 +17,10 @@ function addEnemy() {
 }
 
 function addPowerUp() {
+    // Randomly choose between green and orange power-ups
     const powerUpX = Math.random() * (canvas.width - 15);
-    const powerUpType = 'orange'; // For now, all power-ups are orange
-    powerUps.push({ x: powerUpX, y: -15, width: 15, height: 15, type: powerUpType });
+    const color = Math.random() > 0.5 ? 'green' : 'orange'; // 50% chance for each color
+    powerUps.push({ x: powerUpX, y: -15, width: 15, height: 15, color: color });
 }
 
 function updateGame() {
@@ -84,7 +85,32 @@ function updateGame() {
 
     powerUps.forEach((powerUp, index) => {
         powerUp.y += 1;
-        ctx.fillStyle = 'yellow';
+        ctx.fillStyle = powerUp.color;
         ctx.fillRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
 
-        if (powerUp.x < playerX + playerWidth && powerUp.x + powerUp.width > playerX && powerUp.y + powerUp.height > canvas.height - 
+        if (powerUp.x < playerX + playerWidth && powerUp.x + powerUp.width > playerX && powerUp.y + powerUp.height > canvas.height - 20 && powerUp.y < canvas.height) {
+            powerUps.splice(index, 1);
+            if (powerUp.color === 'green') {
+                shootInterval = Math.max(5, shootInterval - 2); // Increase shooting speed
+            } else if (powerUp.color === 'orange') {
+                playerMoveSpeed += 2; // Increase player movement speed
+            }
+        }
+    });
+
+    requestAnimationFrame(updateGame);
+}
+
+function shootBullet() {
+    bullets.push({ x: playerX + 12.5, y: canvas.height - 20 });
+}
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft' && playerX > 0) {
+        playerX -= playerMoveSpeed;
+    } else if (event.key === 'ArrowRight' && playerX < canvas.width - playerWidth) {
+        playerX += playerMoveSpeed;
+    }
+});
+
+updateGame();
