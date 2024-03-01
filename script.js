@@ -110,7 +110,15 @@ function updateGame() {
     }
 
     if (score > 90) {
+        prob_add_enemy = 0.8
+    }
+
+    if (score > 200) {
         prob_add_enemy = 0.9
+    }
+
+    if (score > 500) {
+        prob_add_enemy = 0.95
     }
 
 
