@@ -12,13 +12,14 @@ let shootInterval = 15;
 let shootTimer = shootInterval;
 let playerMoveSpeed = 10;
 let bulletCount = 1;
+let score = 0; // Initialize score
 
 function addEnemy() {
-    const sizeClasses = [60, 50, 45, 40, 35, 30, 25, 20, 15, 10]; // Possible sizes
-    const sizeIndex = sizeClasses.findIndex((size, index) => Math.random() < 1 / (index + 2));
-    const size = sizeClasses[sizeIndex >= 0 ? sizeIndex : sizeClasses.length - 1];
-    const enemyPositionX = Math.random() * (canvas.width - size);
-    enemies.push({ x: enemyPositionX, y: -size, size: size, hitCount: 0 });
+    // Adjust maximum enemy size based on score, capped at 60
+    const maxEnemySize = Math.min(60, 10 + Math.sqrt(score));
+    const enemySize = Math.random() * (maxEnemySize - 10) + 10; // Enemies now range from 10 to maxEnemySize
+    const enemyPositionX = Math.random() * (canvas.width - enemySize);
+    enemies.push({ x: enemyPositionX, y: -enemySize, size: enemySize, hitCount: 0 });
 }
 
 function addPowerUp() {
@@ -30,6 +31,11 @@ function addPowerUp() {
 
 function updateGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Display score
+    ctx.font = '16px Arial';
+    ctx.fillStyle = 'white';
+    ctx.fillText('Score: ' + score, 10, 20);
 
     // Player
     ctx.fillStyle = 'blue';
@@ -63,8 +69,13 @@ function updateGame() {
                 enemy.hitCount++;
                 if (enemy.hitCount >= 10 || enemy.size <= 10) {
                     enemies.splice(enemyIndex, 1);
+                    score++; // Increase score for each enemy defeated
+                    if (score >= 1000) { // Game ends when score reaches 1000
+                        alert("Congratulations! You've reached a score of 1000!");
+                        window.location.reload(); // Reset the game
+                    }
                 } else {
-                    enemy.size -= enemy.size > 10 ? 5 : 0; // Shrink size, but not below 10
+                    enemy.size -= enemy.size > 10 ? 5 : 0;
                 }
             }
         });
@@ -112,7 +123,7 @@ function updateGame() {
             } else if (powerUp.color === 'orange') {
                 playerMoveSpeed += 2;
             } else if (powerUp.color === 'purple') {
-                bulletCount++; // This will need adjustment to handle the angle spread
+                bulletCount++;
             }
         }
     });
@@ -121,15 +132,15 @@ function updateGame() {
 }
 
 function shootBullet() {
-    let angleOffset = 0.785398; // 45 degrees in radians for bullet spread
+    let angleOffset = Math.PI / 4; // 45 degrees in radians for bullet spread
     for (let i = 0; i < bulletCount; i++) {
         let angle = -Math.PI / 2; // Default angle to shoot straight up
         if (bulletCount > 1) {
             angle += angleOffset * (i - (bulletCount - 1) / 2);
         }
         bullets.push({
-            x: playerX + 12.5,
-            y: playerY + 10,
+            x: playerX + playerWidth / 2 - 2.5,
+            y: playerY,
             speed: 5,
             angle: angle
         });
