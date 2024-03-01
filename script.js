@@ -12,14 +12,19 @@ let shootInterval = 15;
 let shootTimer = shootInterval;
 let playerMoveSpeed = 10;
 let bulletCount = 1;
-let score = 0; // Initialize score
+let score = 0;
+const minEnemySize = 10;
 
 function addEnemy() {
-    // Adjust maximum enemy size based on score, capped at 60
     const maxEnemySize = Math.min(60, 10 + Math.sqrt(score));
-    const enemySize = Math.random() * (maxEnemySize - 10) + 10; // Enemies now range from 10 to maxEnemySize
+    const enemySize = Math.random() * (maxEnemySize - 10) + 10;
     const enemyPositionX = Math.random() * (canvas.width - enemySize);
-    enemies.push({ x: enemyPositionX, y: -enemySize, size: enemySize, hitCount: 0 });
+    enemies.push({
+        x: enemyPositionX,
+        y: -enemySize,
+        size: enemySize,
+        originalSize: enemySize,
+    });
 }
 
 function addPowerUp() {
@@ -35,8 +40,7 @@ function updateGame() {
     // Display score
     ctx.font = '20px Arial';
     ctx.fillStyle = 'white';
-    ctx.fillText('Score: ' + score, 10, 30);  // Position the score at the top left
-
+    ctx.fillText('Score: ' + score, 10, 30);
 
     // Player
     ctx.fillStyle = 'blue';
@@ -50,7 +54,7 @@ function updateGame() {
         shootTimer--;
     }
 
-    // Bullets
+    // Update bullets
     bullets.forEach((bullet, index) => {
         bullet.x += bullet.speed * Math.cos(bullet.angle);
         bullet.y += bullet.speed * Math.sin(bullet.angle);
@@ -63,34 +67,28 @@ function updateGame() {
         ctx.fillStyle = 'red';
         ctx.fillRect(bullet.x, bullet.y, 5, 10);
 
-        // Bullet collision with enemies
+        // Check for bullet collision with enemies
         enemies.forEach((enemy, enemyIndex) => {
             if (bullet.x >= enemy.x && bullet.x <= enemy.x + enemy.size && bullet.y <= enemy.y + enemy.size && bullet.y >= enemy.y) {
                 bullets.splice(index, 1);
-                enemy.hitCount++;
-                if (enemy.hitCount >= 10 || enemy.size <= 10) {
+                enemy.size -= enemy.originalSize * 0.1; // Reduce size
+                if (enemy.size < minEnemySize) {
                     enemies.splice(enemyIndex, 1);
-                    score++; // Increase score for each enemy defeated
-                    if (score >= 1000) { // Game ends when score reaches 1000
+                    score++;
+                    if (score >= 1000) {
                         alert("Congratulations! You've reached a score of 1000!");
-                        window.location.reload(); // Reset the game
+                        window.location.reload();
                     }
-                } else {
-                    enemy.size -= enemy.size > 10 ? 5 : 0;
                 }
             }
         });
 
-        if (bullet.y < 0 || bullet.y > canvas.height) {
+        if (bullet.y < 0 || bullet.y > canvas.height || bullet.x < 0 || bullet.x > canvas.width) {
             bullets.splice(index, 1);
         }
     });
 
-    // Enemies
-    if (Math.random() < 0.02) {
-        addEnemy();
-    }
-
+    // Update enemies
     enemies.forEach((enemy, index) => {
         enemy.y += 2;
         ctx.fillStyle = 'green';
@@ -98,8 +96,7 @@ function updateGame() {
 
         if (enemy.y + enemy.size > playerY && enemy.x < playerX + playerWidth && enemy.x + enemy.size > playerX && enemy.y < playerY + playerHeight) {
             alert("Game Over");
-            window.location.reload(); // Reset the game
-            return;
+            window.location.reload();
         }
 
         if (enemy.y > canvas.height) {
@@ -107,11 +104,7 @@ function updateGame() {
         }
     });
 
-    // Power-ups
-    if (Math.random() < 0.01) {
-        addPowerUp();
-    }
-
+    // Update power-ups
     powerUps.forEach((powerUp, index) => {
         powerUp.y += 1;
         ctx.fillStyle = powerUp.color;
@@ -133,12 +126,9 @@ function updateGame() {
 }
 
 function shootBullet() {
-    let angleOffset = Math.PI / 4; // 45 degrees in radians for bullet spread
+    let angleOffset = (bulletCount - 1) * Math.PI / 16; // Adjust angle spread based on bullet count
     for (let i = 0; i < bulletCount; i++) {
-        let angle = -Math.PI / 2; // Default angle to shoot straight up
-        if (bulletCount > 1) {
-            angle += angleOffset * (i - (bulletCount - 1) / 2);
-        }
+        let angle = -Math.PI / 2 - angleOffset + (i * 2 * angleOffset) / (bulletCount - 1 || 1);
         bullets.push({
             x: playerX + playerWidth / 2 - 2.5,
             y: playerY,
