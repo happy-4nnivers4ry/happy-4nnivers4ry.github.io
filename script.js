@@ -11,6 +11,7 @@ let powerUps = [];
 let shootInterval = 15;
 let shootTimer = shootInterval;
 let playerMoveSpeed = 10;
+let bulletCount = 1;
 
 function addEnemy() {
     const sizeClasses = [60, 50, 45, 40, 35, 30, 25, 20, 15, 10]; // Possible sizes
