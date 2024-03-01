@@ -9,7 +9,8 @@ let enemies = [];
 let powerUps = [];
 let shootInterval = 15;
 let shootTimer = shootInterval;
-let playerMoveSpeed = 10; // Initial player movement speed
+let playerMoveSpeed = 10;
+let bulletCount = 1; // Number of bullets to fire
 
 function addEnemy() {
     const enemyPositionX = Math.random() * (canvas.width - 30);
@@ -17,9 +18,10 @@ function addEnemy() {
 }
 
 function addPowerUp() {
-    // Randomly choose between green and orange power-ups
+    // Randomly choose between yellow and orange and purple power-ups
     const powerUpX = Math.random() * (canvas.width - 15);
-    const color = Math.random() > 0.5 ? 'green' : 'orange'; // 50% chance for each color
+    const colors = ['yellow', 'orange', 'purple']; // Possible power-up colors
+    const color = colors[Math.floor(Math.random() * colors.length)];
     powerUps.push({ x: powerUpX, y: -15, width: 15, height: 15, color: color });
 }
 
@@ -40,7 +42,10 @@ function updateGame() {
 
     // Bullets
     bullets.forEach((bullet, index) => {
-        bullet.y -= 5;
+        // Update position based on angle
+        bullet.x += bullet.speed * Math.cos(bullet.angle);
+        bullet.y += bullet.speed * Math.sin(bullet.angle);
+
         ctx.fillStyle = 'red';
         ctx.fillRect(bullet.x, bullet.y, 5, 10);
 
@@ -52,7 +57,7 @@ function updateGame() {
             }
         });
 
-        if (bullet.y < 0) {
+        if (bullet.y < 0 || bullet.x < 0 || bullet.x > canvas.width) {
             bullets.splice(index, 1);
         }
     });
@@ -90,10 +95,12 @@ function updateGame() {
 
         if (powerUp.x < playerX + playerWidth && powerUp.x + powerUp.width > playerX && powerUp.y + powerUp.height > canvas.height - 20 && powerUp.y < canvas.height) {
             powerUps.splice(index, 1);
-            if (powerUp.color === 'green') {
-                shootInterval = Math.max(5, shootInterval - 2); // Increase shooting speed
+            if (powerUp.color === 'yellow') {
+                shootInterval = Math.max(5, shootInterval - 2);
             } else if (powerUp.color === 'orange') {
-                playerMoveSpeed += 2; // Increase player movement speed
+                playerMoveSpeed += 2;
+            } else if (powerUp.color === 'purple') {
+                bulletCount++; // Increase the number of bullets fired
             }
         }
     });
@@ -102,7 +109,19 @@ function updateGame() {
 }
 
 function shootBullet() {
-    bullets.push({ x: playerX + 12.5, y: canvas.height - 20 });
+    let angleOffset = 0.785398; // 45 degrees in radians
+    for (let i = 0; i < bulletCount; i++) {
+        let angle = -Math.PI / 2; // Default angle to shoot straight up
+        if (bulletCount > 1) {
+            angle += angleOffset * (i - (bulletCount - 1) / 2);
+        }
+        bullets.push({
+            x: playerX + 12.5,
+            y: canvas.height - 20,
+            speed: 5,
+            angle: angle
+        });
+    }
 }
 
 document.addEventListener('keydown', (event) => {
