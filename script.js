@@ -33,9 +33,10 @@ function updateGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Display score
-    ctx.font = '16px Arial';
+    ctx.font = '20px Arial';
     ctx.fillStyle = 'white';
-    ctx.fillText('Score: ' + score, 10, 20);
+    ctx.fillText('Score: ' + score, 10, 30);  // Position the score at the top left
+
 
     // Player
     ctx.fillStyle = 'blue';
