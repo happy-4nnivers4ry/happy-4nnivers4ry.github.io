@@ -57,11 +57,12 @@ function updateGame() {
     bullets.forEach((bullet, index) => {
         bullet.x += bullet.speed * Math.cos(bullet.angle);
         bullet.y += bullet.speed * Math.sin(bullet.angle);
-
+    
         // Bullet bounce on walls
         if (bullet.x <= 0 || bullet.x >= canvas.width) {
             bullet.angle = Math.PI - bullet.angle;
-        }
+            bullet.x = bullet.x <= 0 ? 0 : canvas.width; // Correct bullet position
+        }    
 
         ctx.fillStyle = 'red';
         ctx.fillRect(bullet.x, bullet.y, 5, 10);
