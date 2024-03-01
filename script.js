@@ -15,7 +15,7 @@ let bulletCount = 1;
 let score = 0;
 
 function addEnemy() {
-    const maxEnemySize = Math.min(10 + score, 60);
+    const maxEnemySize = Math.min(10 + score * 3, 150);
     const enemySize = Math.random() * (maxEnemySize - 10) + 10;
     const enemyPositionX = Math.random() * (canvas.width - enemySize);
     enemies.push({
