@@ -4,12 +4,12 @@ const ctx = canvas.getContext('2d');
 let playerX = canvas.width / 2;
 let playerWidth = 30;
 let playerHeight = 30;
-let playerSpeed = 10; // Initial player speed
 let bullets = [];
 let enemies = [];
 let powerUps = [];
 let shootInterval = 15;
-let shootTimer = shootInterval;
+let shootTimer = 0;
+let isShooting = false; // Flag to check if spacebar is pressed
 
 function addEnemy() {
     const enemyPositionX = Math.random() * (canvas.width - 30);
@@ -18,8 +18,7 @@ function addEnemy() {
 
 function addPowerUp() {
     const powerUpX = Math.random() * (canvas.width - 15);
-    const powerUpType = 'orange'; // For now, all power-ups are orange
-    powerUps.push({ x: powerUpX, y: -15, width: 15, height: 15, type: powerUpType });
+    powerUps.push({ x: powerUpX, y: -15, width: 15, height: 15 });
 }
 
 function updateGame() {
@@ -29,11 +28,11 @@ function updateGame() {
     ctx.fillStyle = 'blue';
     ctx.fillRect(playerX, canvas.height - 20, playerWidth, playerHeight);
 
-    // Shooting logic
-    if (shootTimer <= 0) {
+    // Continuous shooting
+    if (isShooting && shootTimer <= 0) {
         shootBullet();
         shootTimer = shootInterval;
-    } else {
+    } else if (shootTimer > 0) {
         shootTimer--;
     }
 
@@ -67,6 +66,7 @@ function updateGame() {
         ctx.fillRect(enemy.x, enemy.y, 30, 30);
 
         if (enemy.y + 30 > canvas.height - 20 && enemy.x < playerX + playerWidth && enemy.x + 30 > playerX) {
+            // Game over
             alert("Game Over");
             window.location.reload(); // Reset the game
             return;
@@ -87,4 +87,33 @@ function updateGame() {
         ctx.fillStyle = 'yellow';
         ctx.fillRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
 
-        if (powerUp.x < playerX + playerWidth && powerUp.x + powerUp.width > playerX && powerUp.y + powerUp.height > canvas.height - 
+        if (powerUp.x < playerX + playerWidth && powerUp.x + powerUp.width > playerX && powerUp.y + powerUp.height > canvas.height - 20 && powerUp.y < canvas.height) {
+            powerUps.splice(index, 1);
+            shootInterval = Math.max(5, shootInterval - 2);
+        }
+    });
+
+    requestAnimationFrame(updateGame);
+}
+
+function shootBullet() {
+    bullets.push({ x: playerX + 12.5, y: canvas.height - 20 });
+}
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft' && playerX > 0) {
+        playerX -= 10;
+    } else if (event.key === 'ArrowRight' && playerX < canvas.width - playerWidth) {
+        playerX += 10;
+    } else if (event.key === ' ') {
+        isShooting = true;
+    }
+});
+
+document.addEventListener('keyup', (event) => {
+    if (event.key === ' ') {
+        isShooting = false;
+    }
+});
+
+updateGame();
