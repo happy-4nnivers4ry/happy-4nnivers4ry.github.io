@@ -3,14 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const player = document.getElementById('player');
     let playerX = 100, playerY = 0;
     let velocityY = 0;
-    const gravity = -0.3; // Less gravity for a lower jump
+    const gravity = -0.2; // Lower gravity for a less powerful jump
     const playerHeight = 60; // The player is now three squares tall
     let tetrisPieces = [];
     let currentPiece = null;
     let pieceCount = 0;
-    let isOnGround = false;
-    let moveRight = false;
-    let moveLeft = false;
+    let isOnGround = true;
 
     createPlayer();
     spawnPiece();
@@ -37,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const shape = shapes[Math.floor(Math.random() * shapes.length)];
         const piece = document.createElement('div');
         piece.className = 'tetrisPiece';
-        // L is two blocks wide and one block tall, I is one block wide and three blocks tall
+        // Adjust sizes for the shapes
         piece.style.width = shape === 'L' ? '40px' : '20px';
         piece.style.height = shape === 'L' ? '20px' : '60px';
         piece.style.backgroundColor = 'green';
@@ -54,38 +52,37 @@ document.addEventListener('DOMContentLoaded', () => {
         if (moveRight) playerX += 5;
         if (moveLeft) playerX -= 5;
 
-        // Update gravity and jump
-        velocityY += gravity; // Apply gravity
+        // Apply gravity if the player is not on the ground
+        if (!isOnGround) {
+            velocityY += gravity; // Apply gravity
+        }
         playerY += velocityY;
 
-        // Check if the player is on the ground or hitting a piece
+        // Check for ground collision
         if (playerY <= 0) {
             playerY = 0; // Keep the player above the ground
             velocityY = 0; // Stop vertical movement
             isOnGround = true;
-        } else {
-            let collisionResult = checkCollisionWithPieces(player);
-            if (collisionResult.collided) {
-                if (velocityY < 0) { // Player is moving down
-                    playerY = collisionResult.blockTop; // Position player on top of the block
-                    velocityY = 0; // Stop vertical movement
-                }
-                isOnGround = true;
-            } else {
-                isOnGround = false;
-            }
         }
 
-        // Update the Tetris pieces
+        let collisionResult = checkCollisionWithPieces(player);
+        if (collisionResult.collided) {
+            velocityY = 0; // Stop vertical movement
+            isOnGround = true;
+            playerY = collisionResult.blockTop; // Position player on top of the block
+        } else if (!collisionResult.collided && playerY > 0) {
+            isOnGround = false;
+        }
+
+        // Update Tetris pieces
         if (currentPiece && !currentPiece.stopped) {
-            currentPiece.y -= 1; // Pieces fall down by 1px every frame
-            if (currentPiece.y <= 0 || checkCollisionWithPieces(currentPiece)) {
+            currentPiece.y -= 1; // Tetris piece falls
+            if (currentPiece.y < 0 || checkCollisionWithPieces(currentPiece).collided) {
                 currentPiece.stopped = true;
                 currentPiece = null;
                 spawnPiece();
-            } else {
-                currentPiece.element.style.bottom = `${currentPiece.y}px`;
             }
+            currentPiece.element.style.bottom = `${currentPiece.y}px`;
         }
 
         // Set the player's position
@@ -100,10 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 entity.x < piece.x + piece.width &&
                 entity.x + entity.width > piece.x &&
                 entity.y < piece.y + piece.height &&
-                entity.y + (entity === player ? playerHeight : 0) > piece.y) {
-                // Detect top collision for the player
-                if (entity === player && velocityY < 0 && entity.y < piece.y + piece.height) {
+                entity.y + (entity === player ? playerHeight : entity.height) > piece.y) {
+                if (entity === player && velocityY <= 0 && entity.y < piece.y + piece.height) {
+                    // Detect top collision for the player
                     collision = { collided: true, blockTop: piece.y + piece.height };
+                    break;
                 } else if (entity !== player) {
                     collision.collided = true;
                 }
@@ -115,25 +113,17 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(update, 20);
 
     document.addEventListener('keydown', (e) => {
-        switch (e.key) {
-            case 'ArrowRight':
-                moveRight = true;
-                break;
-            case 'ArrowLeft':
-                moveLeft = true;
-                break;
-            case 'ArrowUp':
-                if (isOnGround) {
-                    velocityY = 10; // Adjust to a reasonable jump velocity
-                    isOnGround = false;
-                }
-                break;
-            // Other controls...
+        if (e.key === 'ArrowRight') {
+            moveRight = true;
+        } else if (e.key === 'ArrowLeft') {
+            moveLeft = true;
+        } else if (e.key === 'ArrowUp' && isOnGround) {
+            velocityY = 10; // Jump strength
+            isOnGround = false;
         }
     });
 
     document.addEventListener('keyup', (e) => {
-        // Stop moving when the arrow keys are released
         if (e.key === 'ArrowRight') {
             moveRight = false;
         } else if (e.key === 'ArrowLeft') {
