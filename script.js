@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let tetrisPieces = [];
     let currentPiece = null;
     let pieceCount = 0;
+    let isOnGround = false;
 
     createPlayer();
     spawnPiece();
@@ -34,14 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const shape = shapes[Math.floor(Math.random() * shapes.length)];
         const piece = document.createElement('div');
         piece.className = 'tetrisPiece';
-        piece.style.width = shape === 'L' ? '40px' : '20px';
-        piece.style.height = '20px';
+        piece.style.width = shape === 'L' ? '60px' : '20px'; // Adjust width for L shape
+        piece.style.height = shape === 'L' ? '40px' : '60px'; // Adjust height for L shape
         piece.style.backgroundColor = 'green';
         piece.style.position = 'absolute';
-        piece.style.left = `${Math.random() * (gameArea.offsetWidth - 40)}px`; // Spawn within bounds
+        piece.style.left = `${Math.random() * (gameArea.offsetWidth - 60)}px`; // Spawn within bounds
         piece.style.bottom = `${gameArea.offsetHeight}px`;
         gameArea.appendChild(piece);
-        currentPiece = { element: piece, x: parseFloat(piece.style.left), y: parseFloat(piece.style.bottom), width: shape === 'L' ? 40 : 20, height: 20, stopped: false };
+        currentPiece = { element: piece, x: parseFloat(piece.style.left), y: parseFloat(piece.style.bottom), width: shape === 'L' ? 60 : 20, height: shape === 'L' ? 40 : 60, stopped: false, shape: shape };
         tetrisPieces.push(currentPiece);
     }
 
@@ -57,17 +58,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        if (velocityY < 0 || checkCollision(player, tetrisPieces, true)) {
-            velocityY += gravity; // Gravity affects player
-        } else {
-            velocityY = 0; // Stop falling
-        }
-
+        velocityY += gravity; // Gravity affects player
         playerY += velocityY;
+        isOnGround = false;
 
-        // Prevent the player from falling out of the game area
-        if (playerY < 0) {
-            playerY = 0;
+        // Collision detection for player
+        if (playerY <= 0 || checkCollision(player, tetrisPieces, true)) {
+            velocityY = 0;
+            playerY = Math.max(playerY, 0); // Prevent going below the ground
+            isOnGround = true;
         }
 
         player.style.left = `${playerX}px`;
@@ -80,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 entity.y < piece.y + piece.height && entity.y + (isPlayer ? playerHeight : entity.height) > piece.y) {
                 if (isPlayer && velocityY < 0) {
                     playerY = piece.y + piece.height; // Adjust player position on top of the piece
+                    isOnGround = true;
                 }
                 return true;
             }
@@ -98,8 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 playerX -= 5;
                 break;
             case 'ArrowUp':
-                if (velocityY === 0) {
+                if (isOnGround) {
                     velocityY = 10; // Jump only if on the ground or a piece
+                    isOnGround = false;
                 }
                 break;
             case 'a':
