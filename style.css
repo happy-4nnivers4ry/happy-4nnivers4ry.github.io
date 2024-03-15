@@ -3,10 +3,35 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #000;
     margin: 0;
+    background-color: #f0f0f0;
 }
 
-canvas {
-    background-color: #111;
+#gameArea {
+    position: relative;
+    width: 600px;
+    height: 400px;
+    background-color: #fff;
+    overflow: hidden;
+}
+
+#player, #pointA, #pointB {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: red;
+}
+
+#player {
+    background-color: blue;
+}
+
+#pointA {
+    left: 10px;
+    bottom: 10px;
+}
+
+#pointB {
+    right: 10px;
+    top: 10px;
 }
