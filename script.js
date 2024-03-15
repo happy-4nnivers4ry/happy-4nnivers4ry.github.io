@@ -48,32 +48,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function update() {
-        // Player movement
-        if (moveRight) playerX += 5;
-        if (moveLeft) playerX -= 5;
-
         // Apply gravity if the player is not on the ground
         if (!isOnGround) {
             velocityY += gravity; // Apply gravity
         }
-        playerY += velocityY;
-
-        // Check for ground collision
-        if (playerY <= 0) {
-            playerY = 0; // Keep the player above the ground
-            velocityY = 0; // Stop vertical movement
-            isOnGround = true;
-        }
-
+    
+        // Check for collision and update the player's Y position
         let collisionResult = checkCollisionWithPieces(player);
         if (collisionResult.collided) {
-            velocityY = 0; // Stop vertical movement
+            if (velocityY <= 0) {
+                playerY = collisionResult.blockTop; // Position the player on top of the block
+                velocityY = 0; // Stop vertical movement
+            }
             isOnGround = true;
-            playerY = collisionResult.blockTop; // Position player on top of the block
-        } else if (!collisionResult.collided && playerY > 0) {
-            isOnGround = false;
+        } else {
+            playerY += velocityY;
+            if (playerY <= 0) {
+                playerY = 0; // Keep the player above the ground
+                isOnGround = true;
+            } else {
+                isOnGround = false;
+            }
         }
-
+    
+        // Update the player's position
+        player.style.left = `${playerX}px`;
+        player.style.bottom = `${playerY}px`;
+    
         // Update Tetris pieces
         if (currentPiece && !currentPiece.stopped) {
             currentPiece.y -= 1; // Tetris piece falls
@@ -84,12 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             currentPiece.element.style.bottom = `${currentPiece.y}px`;
         }
-
-        // Set the player's position
-        player.style.left = `${playerX}px`;
-        player.style.bottom = `${playerY}px`;
     }
-
+    
     function checkCollisionWithPieces(entity) {
         let collision = { collided: false, blockTop: 0 };
         for (let piece of tetrisPieces) {
@@ -97,18 +94,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 entity.x < piece.x + piece.width &&
                 entity.x + entity.width > piece.x &&
                 entity.y < piece.y + piece.height &&
-                entity.y + (entity === player ? playerHeight : entity.height) > piece.y) {
-                if (entity === player && velocityY <= 0 && entity.y < piece.y + piece.height) {
-                    // Detect top collision for the player
+                entity.y + playerHeight > piece.y) {
+                // Detect top collision for the player
+                if (entity === player && entity.y <= piece.y + piece.height && entity.y + playerHeight >= piece.y) {
                     collision = { collided: true, blockTop: piece.y + piece.height };
                     break;
-                } else if (entity !== player) {
-                    collision.collided = true;
                 }
             }
         }
         return collision;
     }
+    
+    player.style.zIndex = 100; // Ensure the player is visually on top of the Tetris pieces
+    
+    
 
     setInterval(update, 20);
 
