@@ -3,12 +3,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const player = document.getElementById('player');
     let playerX = 10, playerY = 0;
     let velocityY = 0;
-    const gravity = -0.98;
+    const gravity = -0.5; // Lower gravity for a bigger jump
+    const jumpVelocity = 15; // Increase jump strength
     const playerHeight = 60; // The player is now three squares tall
     let tetrisPieces = [];
     let currentPiece = null;
     let pieceCount = 0;
     let isOnGround = false;
+    let moveRight = false;
+    let moveLeft = false;
 
     createPlayer();
     spawnPiece();
@@ -35,21 +38,42 @@ document.addEventListener('DOMContentLoaded', () => {
         const shape = shapes[Math.floor(Math.random() * shapes.length)];
         const piece = document.createElement('div');
         piece.className = 'tetrisPiece';
-        piece.style.width = shape === 'L' ? '60px' : '20px'; // Adjust width for L shape
-        piece.style.height = shape === 'L' ? '40px' : '60px'; // Adjust height for L shape
+        // L is two blocks wide and one block tall, I is one block wide and three blocks tall
+        piece.style.width = shape === 'L' ? '40px' : '20px';
+        piece.style.height = shape === 'L' ? '20px' : '60px';
         piece.style.backgroundColor = 'green';
         piece.style.position = 'absolute';
-        piece.style.left = `${Math.random() * (gameArea.offsetWidth - 60)}px`; // Spawn within bounds
+        piece.style.left = `${Math.random() * (gameArea.offsetWidth - 40)}px`; // Spawn within bounds
         piece.style.bottom = `${gameArea.offsetHeight}px`;
         gameArea.appendChild(piece);
-        currentPiece = { element: piece, x: parseFloat(piece.style.left), y: parseFloat(piece.style.bottom), width: shape === 'L' ? 60 : 20, height: shape === 'L' ? 40 : 60, stopped: false, shape: shape };
+        currentPiece = { element: piece, x: parseFloat(piece.style.left), y: parseFloat(piece.style.bottom), width: shape === 'L' ? 40 : 20, height: shape === 'L' ? 20 : 60, stopped: false, shape: shape };
         tetrisPieces.push(currentPiece);
     }
 
     function update() {
+        // Player movement
+        if (moveRight) playerX += 5;
+        if (moveLeft) playerX -= 5;
+
+        // Update gravity and jump
+        if (!isOnGround) {
+            velocityY += gravity; // Apply gravity if the player is not on the ground
+        }
+        playerY += velocityY;
+
+        if (playerY <= 0) {
+            playerY = 0; // Prevent the player from going below the game area
+            isOnGround = true;
+        } else if (checkCollisionWithPieces(player)) {
+            isOnGround = true;
+        } else {
+            isOnGround = false;
+        }
+
+        // Update the Tetris pieces
         if (currentPiece && !currentPiece.stopped) {
-            currentPiece.y -= 1; // Tetris piece falls
-            if (currentPiece.y <= 0 || checkCollision(currentPiece, tetrisPieces)) {
+            currentPiece.y -= 1; // Pieces fall down by 1px every frame
+            if (currentPiece.y <= 0 || checkCollisionWithPieces(currentPiece)) {
                 currentPiece.stopped = true;
                 currentPiece = null;
                 spawnPiece();
@@ -58,28 +82,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        velocityY += gravity; // Gravity affects player
-        playerY += velocityY;
-        isOnGround = false;
-
-        // Collision detection for player
-        if (playerY <= 0 || checkCollision(player, tetrisPieces, true)) {
-            velocityY = 0;
-            playerY = Math.max(playerY, 0); // Prevent going below the ground
-            isOnGround = true;
-        }
-
+        // Set the player's position
         player.style.left = `${playerX}px`;
         player.style.bottom = `${playerY}px`;
     }
 
-    function checkCollision(entity, pieces, isPlayer = false) {
-        for (let piece of pieces) {
-            if (entity !== piece && entity.x < piece.x + piece.width && entity.x + entity.width > piece.x &&
-                entity.y < piece.y + piece.height && entity.y + (isPlayer ? playerHeight : entity.height) > piece.y) {
-                if (isPlayer && velocityY < 0) {
-                    playerY = piece.y + piece.height; // Adjust player position on top of the piece
-                    isOnGround = true;
+    function checkCollisionWithPieces(entity) {
+        for (let piece of tetrisPieces) {
+            if (entity !== piece &&
+                entity.x < piece.x + piece.width &&
+                entity.x + entity.width > piece.x &&
+                entity.y < piece.y + piece.height &&
+                entity.y + playerHeight > piece.y) {
+                if (velocityY < 0) {
+                    // Player is falling
+                    playerY = piece.y + piece.height; // Place the player on top of the piece
+                    velocityY = 0;
                 }
                 return true;
             }
@@ -92,36 +110,23 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (e) => {
         switch (e.key) {
             case 'ArrowRight':
-                playerX += 5;
+                moveRight = true;
                 break;
             case 'ArrowLeft':
-                playerX -= 5;
+                moveLeft = true;
                 break;
             case 'ArrowUp':
                 if (isOnGround) {
-                    velocityY = 10; // Jump only if on the ground or a piece
-                    isOnGround = false;
+                    velocityY = jumpVelocity; // Apply jump velocity
+                    isOnGround = false; // Player is in the air
                 }
                 break;
-            case 'a':
-                if (currentPiece) {
-                    currentPiece.x -= 5;
-                    currentPiece.element.style.left = `${currentPiece.x}px`;
-                }
-                break;
-            case 'd':
-                if (currentPiece) {
-                    currentPiece.x += 5;
-                    currentPiece.element.style.left = `${currentPiece.x}px`;
-                }
-                break;
-            case 's':
-                if (currentPiece) {
-                    currentPiece.y -= 10; // Make the piece fall faster
-                    currentPiece.element.style.bottom = `${currentPiece.y}px`;
-                }
-                break;
-            // Rotation logic for the pieces will be more complex and is not included here.
+            // Add logic for piece control here if necessary.
         }
+    });
+
+    document.addEventListener('keyup', (e) => {
+        if (e.key === 'ArrowRight') moveRight = false;
+        if (e.key === 'ArrowLeft') moveLeft = false;
     });
 });
