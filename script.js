@@ -4,8 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let playerX = 10, playerY = 0;
     let velocityY = 0;
     const gravity = -0.5;
+    let tetrisPieces = [];
     let currentPiece = null;
     let gameInterval = null;
+    const pieceShapes = ['L', 'I']; // The two types of pieces
 
     function createPlayer() {
         player.style.width = '20px';
@@ -17,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updatePlayer() {
-        if (playerY > 0 || velocityY > 0) {
+        if ((playerY > 0 || velocityY > 0) && !checkCollisionWithPieces(player)) {
             velocityY += gravity; // Apply gravity
             playerY += velocityY;
             if (playerY < 0) {
@@ -31,16 +33,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createTetrisPiece() {
+        const shape = pieceShapes[Math.floor(Math.random() * pieceShapes.length)]; // Randomly choose a shape
         const piece = document.createElement('div');
         piece.className = 'tetrisPiece';
-        piece.style.width = '20px';
+        piece.style.width = shape === 'L' ? '40px' : '20px'; // L is 2 blocks wide, I is 1 block wide
         piece.style.height = '20px';
         piece.style.backgroundColor = 'green';
         piece.style.position = 'absolute';
-        piece.style.left = `${Math.random() * (gameArea.offsetWidth - 20)}px`;
+        piece.style.left = `${Math.random() * (gameArea.offsetWidth - (shape === 'L' ? 40 : 20))}px`;
         piece.style.bottom = `${gameArea.offsetHeight}px`;
         gameArea.appendChild(piece);
-        currentPiece = { element: piece, x: parseFloat(piece.style.left), y: parseFloat(piece.style.bottom), stopped: false };
+        currentPiece = { element: piece, x: parseFloat(piece.style.left), y: parseFloat(piece.style.bottom), stopped: false, shape: shape };
     }
 
     function updateTetrisPiece() {
@@ -60,12 +63,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function checkCollisionWithOtherPieces(piece) {
-        return Array.from(gameArea.getElementsByClassName('tetrisPiece')).some(other => {
-            const otherPiece = other.getBoundingClientRect();
-            const thisPiece = piece.element.getBoundingClientRect();
-            return piece !== currentPiece && thisPiece.bottom <= otherPiece.top &&
-                   thisPiece.right > otherPiece.left && thisPiece.left < otherPiece.right;
-        });
+        // Add piece to the list when it stops
+        if (piece.stopped) {
+            tetrisPieces.push(piece);
+            return true;
+        }
+        // Check for collision with existing pieces
+        for (let other of tetrisPieces) {
+            if (piece !== other && piece.x < other.x + 20 && piece.x + 20 > other.x && piece.y < other.y + 20) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function checkCollisionWithPieces(entity) {
+        // This simple collision detection assumes all pieces are 20px in height.
+        for (let piece of tetrisPieces) {
+            if (entity.x < piece.x + 20 && entity.x + 20 > piece.x && entity.y < piece.y + 20 && entity.y + 60 > piece.y) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function startGame() {
@@ -74,12 +93,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         gameInterval = setInterval(() => {
             updatePlayer();
-            updateTetrisPiece();
+            if (!currentPiece) {
+                updateTetrisPiece();
+            }
         }, 20);
     }
 
     document.addEventListener('keydown', (e) => {
-        if (!currentPiece) return; // Do nothing if no piece is falling
+        if (currentPiece && e.key.toLowerCase() === 's') {
+            currentPiece.y -= 5; // Speed up the fall
+            return;
+        }
 
         switch (e.key) {
             case 'ArrowRight':
@@ -89,20 +113,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 playerX -= 5;
                 break;
             case 'ArrowUp':
-                if (playerY === 0) velocityY = 10; // Jump
+                if (playerY === 0 || checkCollisionWithPieces({ x: playerX, y: playerY, width: 20, height: 60 })) velocityY = 10; // Jump
                 break;
             case 'a':
-                currentPiece.x -= 5;
-                currentPiece.element.style.left = `${currentPiece.x}px`;
+                if (currentPiece) {
+                    currentPiece.x -= 5;
+                    currentPiece.element.style.left = `${currentPiece.x}px`;
+                }
                 break;
             case 'd':
-                currentPiece.x += 5;
-                currentPiece.element.style.left = `${currentPiece.x}px`;
+                if (currentPiece) {
+                    currentPiece.x += 5;
+                    currentPiece.element.style.left = `${currentPiece.x}px`;
+                }
                 break;
-            case 'r':
-            case 'R':
-                // TODO: Implement rotation
-                break;
+            // R key for rotation and other controls can be implemented later
         }
     });
 
