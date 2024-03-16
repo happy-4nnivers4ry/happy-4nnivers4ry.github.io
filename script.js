@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         tetrisPieces.push(currentPiece);
     }
+
     function update() {
         velocityY += gravity;
     
@@ -67,11 +68,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let moveCheck = canMoveTo(newX, newY);
     
         if (moveCheck.vertical) {
-            // Prevent the player from going below the floor level
             playerY = newY >= 0 ? newY : 0;
             if (playerY === 0) {
                 velocityY = 0; // Stop vertical movement when hitting the floor
                 isOnGround = true;
+            } else {
+                isOnGround = false;
             }
         } else {
             velocityY = 0;
@@ -79,21 +81,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 let landingPiece = findLandingPiece(newX, playerY);
                 if (landingPiece) {
                     playerY = landingPiece.y + landingPiece.height;
+                    isOnGround = true;
                 } else {
-                    // If there's no piece and player is going below the floor, set to floor level
                     playerY = newY >= 0 ? newY : 0;
-                    if (playerY === 0) {
-                        isOnGround = true;
-                    }
+                    isOnGround = playerY === 0;
                 }
+            } else {
+                isOnGround = false;
             }
         }
     
         if (moveCheck.horizontal) {
             playerX = newX;
         }
-    
-        isOnGround = !moveCheck.vertical && newY <= playerY;
     
         player.style.left = `${playerX}px`;
         player.style.bottom = `${playerY}px`;
