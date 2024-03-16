@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let piece of tetrisPieces) {
             if (onTopOfPiece(newX, newY, piece) && newY - playerHeight < piece.y + piece.height) {
                 canMoveY = false;
-                newY = piece.y + piece.height;  // Adjust player position to stand on the piece
+                newY = piece.y + piece.height - playerHeight;  // Adjust player position to stand exactly on top of the piece
                 velocityY = 0;
                 isOnGround = true;
                 break;
@@ -91,19 +91,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateTetrisPieces() {
+        let allPiecesStopped = true;
+    
         tetrisPieces.forEach(piece => {
             if (!piece.stopped) {
+                allPiecesStopped = false;
                 piece.y -= 1;
                 piece.element.style.bottom = `${piece.y}px`;
                 if (piece.y <= 0 || intersectsAnyPiece(piece)) {
                     piece.stopped = true;
-                    if (!currentPiece || currentPiece.stopped) {
-                        spawnPiece();
-                    }
                 }
             }
         });
+    
+        // If all pieces have stopped, spawn a new piece
+        if (allPiecesStopped) {
+            spawnPiece();
+        }
     }
+    
 
     function intersectsAnyPiece(piece) {
         return tetrisPieces.some(otherPiece => 
