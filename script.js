@@ -86,11 +86,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
 
     function onTopOfPiece(playerX, playerY, piece) {
+        const tolerance = 5; // Allows a small gap between the player and the block to still count as standing on it.
         return playerX + playerWidth > piece.x &&
                playerX < piece.x + piece.width &&
-               playerY + velocityY <= piece.y + piece.height &&
+               playerY + velocityY <= piece.y + piece.height + tolerance && // Added tolerance here
                playerY + playerHeight > piece.y;
     }
+    
 
     function updateTetrisPieces() {
         let allPiecesStopped = true;
