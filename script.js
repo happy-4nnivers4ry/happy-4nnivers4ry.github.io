@@ -157,5 +157,5 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', keydownHandler);
     document.addEventListener('keyup', keyupHandler);
 
-    setInterval(update, 20);
+    setInterval(update, 5);
 });
