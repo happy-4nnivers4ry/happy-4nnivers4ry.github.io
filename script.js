@@ -57,17 +57,42 @@ document.addEventListener('DOMContentLoaded', () => {
         tetrisPieces.push(currentPiece);
     }
 
+    function canMoveTo(newX, newY) {
+        let canMoveHorizontally = true;
+        let canMoveVertically = true;
+    
+        for (let piece of tetrisPieces) {
+            if (intersects(newX, newY, playerHeight, playerHeight, piece.x, piece.y, piece.width, piece.height)) {
+                // Check if the player is trying to move downwards onto a piece
+                if (newY < playerY && newY < piece.y + piece.height && playerY >= piece.y + piece.height) {
+                    canMoveVertically = false; // Block downward movement
+                } else {
+                    // Allow horizontal movement even when intersecting (standing on the piece)
+                    canMoveHorizontally = newX === playerX;
+                }
+            }
+        }
+    
+        // Allow movement if it's only horizontal or only vertical
+        return { horizontal: canMoveHorizontally, vertical: canMoveVertically };
+    }
+    
     function update() {
         velocityY += gravity;
-
+    
         let newX = playerX + (moveRight ? 5 : 0) - (moveLeft ? 5 : 0);
         let newY = playerY + velocityY;
-
-        if (canMoveTo(newX, newY)) {
-            playerX = newX;
+    
+        let moveCheck = canMoveTo(newX, newY);
+    
+        if (moveCheck.vertical) {
             playerY = newY;
         }
-
+    
+        if (moveCheck.horizontal) {
+            playerX = newX;
+        }
+    
         if (playerY <= 0) {
             playerY = 0;
             velocityY = 0;
@@ -75,10 +100,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             isOnGround = false;
         }
-
+    
         player.style.left = `${playerX}px`;
         player.style.bottom = `${playerY}px`;
-
+    
         if (currentPiece && !currentPiece.stopped) {
             currentPiece.y -= 1;
             if (currentPiece.y <= 0 || intersectsAnyPiece(currentPiece.x, currentPiece.y, currentPiece)) {
@@ -90,14 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function canMoveTo(newX, newY) {
-        for (let piece of tetrisPieces) {
-            if (intersects(newX, newY, playerHeight, playerHeight, piece.x, piece.y, piece.width, piece.height)) {
-                return false; // Can't move, there's a piece in the way
-            }
-        }
-        return true; // Can move
-    }
+    
 
     function intersectsAnyPiece(x, y, excludePiece) {
         for (let piece of tetrisPieces) {
