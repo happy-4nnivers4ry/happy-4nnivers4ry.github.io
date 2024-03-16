@@ -55,5 +55,5 @@ body {
     right: 0;
     bottom: -10px;
     z-index: -1;
-    animation: antigravityShine 2s infinite alternate;
+    animation: antigravityShine 2s infinite ease-in-out;
 }
