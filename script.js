@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
         player.style.position = 'absolute';
         player.style.left = `${playerX}px`;
         player.style.bottom = `${playerY}px`;
-        player.style.zIndex = '10';
         gameArea.appendChild(player);
     }
 
@@ -55,12 +54,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function update() {
-        velocityY += gravity;
+        if (!isOnGround) {
+            velocityY -= gravity;  // Apply gravity if not on ground
+        }
 
         let newX = playerX + (moveRight ? 5 : 0) - (moveLeft ? 5 : 0);
         let newY = playerY + velocityY;
 
-        // Reset ground status
+        // Reset ground status before checking collisions
         isOnGround = false;
 
         // Check for collisions
@@ -134,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 moveLeft = true;
                 break;
             case 'ArrowUp':
-                if (isOnGround) {
+                if (isOnGround && velocityY >= 0) {
                     velocityY = jumpVelocity;
                     isOnGround = false;
                 }
