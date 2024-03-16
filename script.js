@@ -70,15 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (moveCheck.vertical) {
             playerY = newY;
         } else {
-            // If vertical movement is blocked, reset velocity and adjust playerY if needed
             velocityY = 0;
             if (newY < playerY) {
-                // Adjust playerY to be exactly on top of the piece it collided with
-                for (let piece of tetrisPieces) {
-                    if (newX < piece.x + piece.width && newX + playerWidth > piece.x && playerY >= piece.y + piece.height) {
-                        playerY = piece.y + piece.height;
-                        break;
-                    }
+                // Find the piece directly below the player to land on it
+                let landingPiece = findLandingPiece(newX, playerY);
+                if (landingPiece) {
+                    playerY = landingPiece.y + landingPiece.height;
                 }
             }
         }
@@ -87,8 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
             playerX = newX;
         }
     
-        // Update isOnGround status based on player's vertical movement and collision checks
-        isOnGround = !moveCheck.vertical && newY < playerY;
+        isOnGround = !moveCheck.vertical && newY <= playerY;
     
         player.style.left = `${playerX}px`;
         player.style.bottom = `${playerY}px`;
@@ -96,25 +92,33 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTetrisPieces();
     }
     
+    function findLandingPiece(playerX, playerY) {
+        for (let piece of tetrisPieces) {
+            if (playerX < piece.x + piece.width && playerX + 20 > piece.x && // 20 is player's width
+                playerY >= piece.y && playerY <= piece.y + piece.height) {
+                return piece;
+            }
+        }
+        return null;
+    }
+    
     function canMoveTo(newX, newY) {
         let canMoveHorizontally = true;
         let canMoveVertically = true;
-
+    
         for (let piece of tetrisPieces) {
-            if (intersects(newX, newY, playerWidth, playerHeight, piece.x, piece.y, piece.width, piece.height)) {
-                // Detect collision from above
-                if (newY - playerHeight < piece.y + piece.height && playerY - playerHeight >= piece.y + piece.height) {
-                    canMoveVertically = false; // Stop downward movement
-                }
-                // Adjust horizontal movement check
-                if (newX !== playerX && intersects(newX, playerY, playerWidth, playerHeight, piece.x, piece.y, piece.width, piece.height)) {
-                    canMoveHorizontally = false;
+            if (intersects(newX, newY, 20, playerHeight, piece.x, piece.y, piece.width, piece.height)) {
+                if (newY - playerHeight < piece.y + piece.height && playerY - playerHeight >= piece.y) {
+                    canMoveVertically = false;
+                } else {
+                    canMoveHorizontally = newX === playerX;
                 }
             }
         }
-
+    
         return { horizontal: canMoveHorizontally, vertical: canMoveVertically };
     }
+    
 
     function onTopOfPiece(playerX, playerY, piece) {
         return playerX < piece.x + piece.width &&
