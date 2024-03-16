@@ -85,11 +85,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
 
+    const groundTolerance = 10;  // Adjust this value as needed
+
     function onTopOfPiece(playerX, playerY, piece) {
-        const tolerance = 5; // Allows a small gap between the player and the block to still count as standing on it.
         return playerX + playerWidth > piece.x &&
                playerX < piece.x + piece.width &&
-               playerY + velocityY <= piece.y + piece.height + tolerance && // Added tolerance here
+               playerY + velocityY <= piece.y + piece.height + groundTolerance &&  // Add tolerance in Y-axis check
                playerY + playerHeight > piece.y;
     }
     
