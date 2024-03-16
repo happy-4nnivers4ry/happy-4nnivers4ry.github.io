@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let velocityY = 0;
     const gravity = -0.2;
     const playerHeight = 60;
+    const playerWidth = 20; // Define playerWidth here
     let tetrisPieces = [];
     let currentPiece = null;
     let pieceCount = 0;
@@ -14,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     createPlayer();
     spawnPiece();
+
 
     function createPlayer() {
         player.style.width = '20px';
@@ -97,21 +99,23 @@ document.addEventListener('DOMContentLoaded', () => {
     function canMoveTo(newX, newY) {
         let canMoveHorizontally = true;
         let canMoveVertically = true;
-    
+
         for (let piece of tetrisPieces) {
             if (intersects(newX, newY, playerWidth, playerHeight, piece.x, piece.y, piece.width, piece.height)) {
                 // Detect collision from above
                 if (newY - playerHeight < piece.y + piece.height && playerY - playerHeight >= piece.y + piece.height) {
                     canMoveVertically = false; // Stop downward movement
-                } else {
-                    canMoveHorizontally = newX === playerX;
+                }
+                // Adjust horizontal movement check
+                if (newX !== playerX && intersects(newX, playerY, playerWidth, playerHeight, piece.x, piece.y, piece.width, piece.height)) {
+                    canMoveHorizontally = false;
                 }
             }
         }
-    
+
         return { horizontal: canMoveHorizontally, vertical: canMoveVertically };
     }
-    
+
     function onTopOfPiece(playerX, playerY, piece) {
         return playerX < piece.x + piece.width &&
                playerX + playerWidth > piece.x &&
