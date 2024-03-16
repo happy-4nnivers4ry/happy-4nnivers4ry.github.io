@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let playerX = 100, playerY = 10;
     let velocityY = 0;
     const gravity = -0.1;
-    const jumpVelocity = 5;
+    const jumpVelocity = 7;
     const playerHeight = 60;
     const playerWidth = 20;
     let tetrisPieces = [];
@@ -157,5 +157,5 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', keydownHandler);
     document.addEventListener('keyup', keyupHandler);
 
-    setInterval(update, 5);
+    setInterval(update, 10);
 });
