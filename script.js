@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const player = document.getElementById('player');
     let playerX = 100, playerY = 10;
     let velocityY = 0;
-    const gravity = -0.2;
-    const jumpVelocity = 10;
+    const gravity = 0.2;  // Gravity pulls down
+    const jumpVelocity = 10;  // Jump velocity goes up
     const playerHeight = 60;
     const playerWidth = 20;
     let tetrisPieces = [];
@@ -55,12 +55,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function update() {
-        velocityY += gravity;
+        if (!isOnGround) {
+            velocityY -= gravity;  // Apply gravity if not on ground
+        }
+
         let newX = playerX + (moveRight ? 5 : 0) - (moveLeft ? 5 : 0);
         let newY = playerY + velocityY;
 
-        // Reset ground status
-        isOnGround = false;
+        isOnGround = false; // Reset ground status
 
         // Check for collisions
         tetrisPieces.forEach(piece => {
@@ -71,7 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update player position
         playerX = Math.max(0, Math.min(gameArea.offsetWidth - playerWidth, newX));
-        playerY = Math.max(0, newY);
+        if (playerY !== newY) {
+            playerY = Math.max(0, newY);
+        }
         player.style.left = `${playerX}px`;
         player.style.bottom = `${playerY}px`;
 
