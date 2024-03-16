@@ -36,17 +36,20 @@ body {
     top: 10px;
 }
 
+
 @keyframes antigravityShine {
     0%, 100% {
-      box-shadow: 0 0 10px 10px rgba(255, 255, 0, 0.5);
-      transform: translateY(-10px);
+        background-color: green;
+        box-shadow: 0 0 10px limegreen, 0 0 20px limegreen, 0 0 30px limegreen;
+        opacity: 0.7;
     }
     50% {
-      box-shadow: 0 0 20px 20px rgba(255, 255, 0, 0.7);
-      transform: translateY(-20px);
+        background-color: yellow;
+        box-shadow: 0 0 20px yellow, 0 0 40px yellow, 0 0 60px yellow;
+        opacity: 1;
     }
-  }
-  
+}
+
 .tetrisPiece::after {
     content: '';
     position: absolute;
@@ -55,5 +58,12 @@ body {
     right: 0;
     bottom: -10px;
     z-index: -1;
+    border-radius: 4px; /* Adjust to match your tetrisPiece border-radius, if any */
     animation: antigravityShine 2s infinite ease-in-out;
+}
+
+.tetrisPiece {
+    position: absolute;
+    /* Your existing styles for tetrisPiece */
+    overflow: hidden; /* This will ensure the ::after pseudo-element does not overflow the tetrisPiece */
 }

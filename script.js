@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const shapes = ['I', 'L'];
         const shape = shapes[Math.floor(Math.random() * shapes.length)];
         const piece = document.createElement('div');
-        piece.className = 'tetrisPiece antigravityEffect';
+        piece.className = 'tetrisPiece';
         piece.style.width = shape === 'L' ? '40px' : '20px';
         piece.style.height = shape === 'L' ? '20px' : '60px';
         piece.style.backgroundColor = 'green';
