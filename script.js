@@ -4,21 +4,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let playerX = 100, playerY = 10;
     let velocityY = 0;
     const gravity = -0.2;
+    const jumpVelocity = 10;
     const playerHeight = 60;
-    const playerWidth = 20; // Define playerWidth here
+    const playerWidth = 20;
     let tetrisPieces = [];
-    let currentPiece = null;
-    let pieceCount = 0;
-    let isOnGround = true;
+    let isOnGround = false;
     let moveRight = false;
     let moveLeft = false;
 
     createPlayer();
     spawnPiece();
 
-
     function createPlayer() {
-        player.style.width = '20px';
+        player.style.width = `${playerWidth}px`;
         player.style.height = `${playerHeight}px`;
         player.style.backgroundColor = 'blue';
         player.style.position = 'absolute';
@@ -29,10 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function spawnPiece() {
-        if (pieceCount < 10) {
-            createTetrisPiece();
-            pieceCount++;
-        }
+        createTetrisPiece();
     }
 
     function createTetrisPiece() {
@@ -47,7 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
         piece.style.left = `${Math.random() * (gameArea.offsetWidth - (shape === 'L' ? 40 : 20))}px`;
         piece.style.bottom = `${gameArea.offsetHeight}px`;
         gameArea.appendChild(piece);
-        currentPiece = {
+
+        tetrisPieces.push({
             element: piece,
             x: parseFloat(piece.style.left),
             y: parseFloat(piece.style.bottom),
@@ -55,128 +51,84 @@ document.addEventListener('DOMContentLoaded', () => {
             height: shape === 'L' ? 20 : 60,
             stopped: false,
             shape: shape
-        };
-        tetrisPieces.push(currentPiece);
+        });
     }
 
-    
     function update() {
         velocityY += gravity;
-    
         let newX = playerX + (moveRight ? 5 : 0) - (moveLeft ? 5 : 0);
         let newY = playerY + velocityY;
-    
-        let moveCheck = canMoveTo(newX, newY);
-    
-        if (moveCheck.vertical) {
-            playerY = newY >= 0 ? newY : 0;
-            if (playerY === 0) {
-                velocityY = 0; // Stop vertical movement when hitting the floor
+
+        // Collision and movement logic
+        let canMoveY = true;
+        for (let piece of tetrisPieces) {
+            if (onTopOfPiece(newX, newY, piece) && newY - playerHeight < piece.y + piece.height) {
+                canMoveY = false;
+                newY = piece.y + piece.height;  // Adjust player position to stand on the piece
+                velocityY = 0;
                 isOnGround = true;
-            } else {
-                isOnGround = false;
-            }
-        } else {
-            velocityY = 0;
-            if (newY < playerY) {
-                let landingPiece = findLandingPiece(newX, playerY);
-                if (landingPiece) {
-                    playerY = landingPiece.y + landingPiece.height;
-                    isOnGround = true;
-                } else {
-                    playerY = newY >= 0 ? newY : 0;
-                    isOnGround = playerY === 0;
-                }
-            } else {
-                isOnGround = false;
+                break;
             }
         }
-    
-        if (moveCheck.horizontal) {
-            playerX = newX;
+
+        if (canMoveY) {
+            playerY = newY >= 0 ? newY : 0;
+            isOnGround = playerY === 0;
         }
-    
+
+        playerX = newX >= 0 ? (newX <= gameArea.offsetWidth - playerWidth ? newX : gameArea.offsetWidth - playerWidth) : 0;
         player.style.left = `${playerX}px`;
         player.style.bottom = `${playerY}px`;
-    
+
         updateTetrisPieces();
     }
-    
-    function canMoveTo(newX, newY) {
-        let canMoveHorizontally = true;
-        let canMoveVertically = true;
-    
-        for (let piece of tetrisPieces) {
-            if (intersects(newX, newY, playerWidth, playerHeight, piece.x, piece.y, piece.width, piece.height)) {
-                // Check if the player is coming from above the piece and moving downward
-                if (newY - playerHeight < piece.y + piece.height && playerY - playerHeight >= piece.y && velocityY < 0) {
-                    canMoveVertically = false;
-                    break;  // No need to check other pieces if one prevents vertical movement
-                }
-            }
-        }
-    
-        return { horizontal: canMoveHorizontally, vertical: canMoveVertically };
-    }
-    
-    function findLandingPiece(playerX, playerY) {
-        for (let piece of tetrisPieces) {
-            if (playerX < piece.x + piece.width && playerX + playerWidth > piece.x &&
-                playerY - playerHeight <= piece.y + piece.height && playerY - playerHeight > piece.y) {
-                return piece;
-            }
-        }
-        return null;
-    }
-    
-    
+
     function onTopOfPiece(playerX, playerY, piece) {
-        return playerX < piece.x + piece.width &&
-               playerX + playerWidth > piece.x &&
-               playerY - playerHeight <= piece.y + piece.height &&
-               playerY - playerHeight > piece.y;
+        return playerX + playerWidth > piece.x &&
+               playerX < piece.x + piece.width &&
+               playerY > piece.y &&
+               playerY - playerHeight < piece.y + piece.height;
     }
-    
-    
+
     function updateTetrisPieces() {
         tetrisPieces.forEach(piece => {
             if (!piece.stopped) {
                 piece.y -= 1;
                 piece.element.style.bottom = `${piece.y}px`;
-                if (piece.y <= 0 || intersectsAnyPiece(piece.x, piece.y, piece)) {
+                if (piece.y <= 0 || intersectsAnyPiece(piece)) {
                     piece.stopped = true;
+                    if (!currentPiece || currentPiece.stopped) {
+                        spawnPiece();
+                    }
                 }
             }
         });
-    
-        // Check if we need to spawn a new piece
-        if (!currentPiece || currentPiece.stopped) {
-            spawnPiece();
-        }
     }
-    
-    function intersectsAnyPiece(x, y, excludePiece) {
-        for (let piece of tetrisPieces) {
-            if (piece !== excludePiece && intersects(x, y, excludePiece.width, excludePiece.height, piece.x, piece.y, piece.width, piece.height)) {
-                return true;
-            }
-        }
-        return false;
+
+    function intersectsAnyPiece(piece) {
+        return tetrisPieces.some(otherPiece => 
+            piece !== otherPiece &&
+            intersects(piece.x, piece.y, piece.width, piece.height, otherPiece.x, otherPiece.y, otherPiece.width, otherPiece.height));
     }
-    
 
     function intersects(x1, y1, w1, h1, x2, y2, w2, h2) {
         return !(x2 >= x1 + w1 || x2 + w2 <= x1 || y2 >= y1 + h1 || y2 + h2 <= y1);
     }
 
     function keydownHandler(e) {
-        if (e.key === 'ArrowRight') {
-            moveRight = true;
-        } else if (e.key === 'ArrowLeft') {
-            moveLeft = true;
-        } else if (e.key === 'ArrowUp' && isOnGround) {
-            velocityY = 10; // Adjust the jump strength
-            isOnGround = false;
+        switch (e.key) {
+            case 'ArrowRight':
+                moveRight = true;
+                break;
+            case 'ArrowLeft':
+                moveLeft = true;
+                break;
+            case 'ArrowUp':
+                if (isOnGround) {
+                    velocityY = jumpVelocity;
+                    isOnGround = false;
+                }
+                break;
         }
     }
 
