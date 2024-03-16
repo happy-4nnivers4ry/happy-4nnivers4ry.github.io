@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
 
-    const groundTolerance = 10;  // Adjust this value as needed
+    const groundTolerance = 50;  // Adjust this value as needed
 
     function onTopOfPiece(playerX, playerY, piece) {
         return playerX + playerWidth > piece.x &&
