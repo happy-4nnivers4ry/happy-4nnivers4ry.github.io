@@ -8,10 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const playerHeight = 60;
     const playerWidth = 20;
     let tetrisPieces = [];
+    let currentPiece = null;
     let isOnGround = false;
     let moveRight = false;
     let moveLeft = false;
-    let movePieceDownFaster = false;
 
     createPlayer();
     spawnPiece();
@@ -28,7 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function spawnPiece() {
-        createTetrisPiece();
+        const piece = createTetrisPiece();
+        currentPiece = piece;
+        tetrisPieces.push(piece);
     }
 
     function createTetrisPiece() {
@@ -44,58 +46,29 @@ document.addEventListener('DOMContentLoaded', () => {
         piece.style.bottom = `${gameArea.offsetHeight}px`;
         gameArea.appendChild(piece);
 
-        tetrisPieces.push({
+        return {
             element: piece,
             x: parseFloat(piece.style.left),
             y: parseFloat(piece.style.bottom),
             width: shape === 'L' ? 40 : 20,
             height: shape === 'L' ? 20 : 60,
             stopped: false,
-            shape: shape,
-            movingRight: false,
-            movingLeft: false,
-        });
+            shape: shape
+        };
     }
 
-    function onTopOfPiece(playerX, playerY, piece) {
-        let effectivePieceHeight = piece.height;
-        if (!piece.stopped && velocityY < 0) {
-            effectivePieceHeight += 20; // ground tolerance
-        }
-        return playerX + playerWidth > piece.x &&
-               playerX < piece.x + piece.width &&
-               playerY + velocityY <= piece.y + effectivePieceHeight &&
-               playerY + playerHeight > piece.y;
-    }
-
-    function update() {
-        velocityY += gravity;
-        let newX = playerX + (moveRight ? 5 : 0) - (moveLeft ? 5 : 0);
-        let newY = playerY + velocityY;
-    
-        let canMoveY = true;
-        isOnGround = false;
-    
-        tetrisPieces.forEach(piece => {
-            if (onTopOfPiece(newX, newY, piece)) {
-                canMoveY = false;
-                newY = piece.y + piece.height;
-                velocityY = 0;
-                isOnGround = true;
-                break;
+    function rotatePiece(piece) {
+        if (piece.shape === 'L') {
+            if (piece.width === 40) {
+                piece.width = 20;
+                piece.height = 40;
+            } else {
+                piece.width = 40;
+                piece.height = 20;
             }
-        });
-
-        if (canMoveY) {
-            playerY = newY >= 0 ? newY : 0;
-            isOnGround = playerY === 0;
+            piece.element.style.width = `${piece.width}px`;
+            piece.element.style.height = `${piece.height}px`;
         }
-
-        playerX = newX >= 0 ? (newX <= gameArea.offsetWidth - playerWidth ? newX : gameArea.offsetWidth - playerWidth) : 0;
-        player.style.left = `${playerX}px`;
-        player.style.bottom = `${playerY}px`;
-    
-        updateTetrisPieces();
     }
 
     function updateTetrisPieces() {
@@ -104,25 +77,15 @@ document.addEventListener('DOMContentLoaded', () => {
         tetrisPieces.forEach(piece => {
             if (!piece.stopped) {
                 allPiecesStopped = false;
-                let pieceDropSpeed = movePieceDownFaster ? 2 : 1;
-                piece.y -= pieceDropSpeed;
+                piece.y -= 1;
                 piece.element.style.bottom = `${piece.y}px`;
-
-                if (piece.movingRight) {
-                    piece.x = Math.min(gameArea.offsetWidth - piece.width, piece.x + 5);
-                    piece.element.style.left = `${piece.x}px`;
-                } else if (piece.movingLeft) {
-                    piece.x = Math.max(0, piece.x - 5);
-                    piece.element.style.left = `${piece.x}px`;
-                }
-
                 if (piece.y <= 0 || intersectsAnyPiece(piece)) {
                     piece.stopped = true;
                 }
             }
         });
-
-        if (allPiecesStopped) {
+    
+        if (allPiecesStopped && currentPiece.stopped) {
             spawnPiece();
         }
     }
@@ -152,20 +115,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 break;
             case 'W':
-            case 'w':
-                rotatePiece();
+                if (currentPiece && !currentPiece.stopped) {
+                    rotatePiece(currentPiece);
+                }
                 break;
             case 'A':
-            case 'a':
-                movePieceLeft();
+                if (currentPiece && !currentPiece.stopped) {
+                    currentPiece.x = Math.max(0, currentPiece.x - 10);
+                    currentPiece.element.style.left = `${currentPiece.x}px`;
+                }
                 break;
             case 'D':
-            case 'd':
-                movePieceRight();
+                if (currentPiece && !currentPiece.stopped) {
+                    currentPiece.x = Math.min(gameArea.offsetWidth - currentPiece.width, currentPiece.x + 10);
+                    currentPiece.element.style.left = `${currentPiece.x}px`;
+                }
                 break;
             case 'S':
-            case 's':
-                movePieceDownFaster = true;
+                if (currentPiece && !currentPiece.stopped) {
+                    currentPiece.y = Math.max(0, currentPiece.y - 10);
+                    currentPiece.element.style.bottom = `${currentPiece.y}px`;
+                }
                 break;
         }
     }
@@ -175,29 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             moveRight = false;
         } else if (e.key === 'ArrowLeft') {
             moveLeft = false;
-        } else if (e.key.toLowerCase() === 's') {
-            movePieceDownFaster = false;
-        } else if (e.key.toLowerCase() === 'd') {
-            tetrisPieces.forEach(piece => piece.movingRight = false);
-        } else if (e.key.toLowerCase() === 'a') {
-            tetrisPieces.forEach(piece => piece.movingLeft = false);
         }
-    }
-
-    function rotatePiece() {
-        // Implement rotation logic here
-    }
-
-    function movePieceLeft() {
-        tetrisPieces.forEach(piece => {
-            if (!piece.stopped) piece.movingLeft = true;
-        });
-    }
-
-    function movePieceRight() {
-        tetrisPieces.forEach(piece => {
-            if (!piece.stopped) piece.movingRight = true;
-        });
     }
 
     document.addEventListener('keydown', keydownHandler);
