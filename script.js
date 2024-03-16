@@ -58,21 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         tetrisPieces.push(currentPiece);
     }
-    function findLandingPiece(playerX, playerY) {
-        for (let piece of tetrisPieces) {
-            if (onTopOfPiece(playerX, playerY, piece)) {
-                return piece;
-            }
-        }
-        return null;
-    }
-    
-    function onTopOfPiece(playerX, playerY, piece) {
-        return playerX + playerWidth > piece.x &&
-               playerX < piece.x + piece.width &&
-               playerY >= piece.y &&
-               playerY - velocityY < piece.y + piece.height;
-    }
+
     
     function update() {
         velocityY += gravity;
@@ -122,7 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let canMoveVertically = true;
     
         for (let piece of tetrisPieces) {
-            if (intersects(newX, newY, 20, playerHeight, piece.x, piece.y, piece.width, piece.height)) {
+            if (intersects(newX, newY, playerWidth, playerHeight, piece.x, piece.y, piece.width, piece.height)) {
+                // Check if the player is coming from above the piece
                 if (newY - playerHeight < piece.y + piece.height && playerY - playerHeight >= piece.y) {
                     canMoveVertically = false;
                 } else {
@@ -133,6 +120,24 @@ document.addEventListener('DOMContentLoaded', () => {
     
         return { horizontal: canMoveHorizontally, vertical: canMoveVertically };
     }
+    
+    function findLandingPiece(playerX, playerY) {
+        for (let piece of tetrisPieces) {
+            if (playerX < piece.x + piece.width && playerX + playerWidth > piece.x &&
+                playerY - playerHeight <= piece.y + piece.height && playerY > piece.y) {
+                return piece;
+            }
+        }
+        return null;
+    }
+    
+    function onTopOfPiece(playerX, playerY, piece) {
+        return playerX < piece.x + piece.width &&
+               playerX + playerWidth > piece.x &&
+               playerY - playerHeight <= piece.y + piece.height &&
+               playerY - playerHeight > piece.y;
+    }
+    
     
     function updateTetrisPieces() {
         if (currentPiece && !currentPiece.stopped) {
