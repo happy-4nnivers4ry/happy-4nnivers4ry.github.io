@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const player = document.getElementById('player');
     let playerX = 100, playerY = 10;
     let velocityY = 0;
-    const gravity = -0.2;
-    const jumpVelocity = 10;
+    const gravity = 0.2;  // Gravity pulls down
+    const jumpVelocity = -10;  // Jump velocity should be negative to move up
     const playerHeight = 60;
     const playerWidth = 20;
     let tetrisPieces = [];
@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
         player.style.position = 'absolute';
         player.style.left = `${playerX}px`;
         player.style.bottom = `${playerY}px`;
-        player.style.zIndex = '10';
         gameArea.appendChild(player);
     }
 
@@ -55,47 +54,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function update() {
-        velocityY += gravity;
+        // Apply gravity if not on the ground
+        if (!isOnGround) {
+            velocityY += gravity;
+        }
+
         let newX = playerX + (moveRight ? 5 : 0) - (moveLeft ? 5 : 0);
         let newY = playerY + velocityY;
 
-        // Collision and movement logic
-        let canMoveY = true;
-        for (let piece of tetrisPieces) {
-            if (onTopOfPiece(newX, newY, piece) && newY - playerHeight < piece.y + piece.height) {
-                canMoveY = false;
-                newY = piece.y + piece.height - playerHeight;  // Adjust player position to stand exactly on top of the piece
-                velocityY = 0;
-                isOnGround = true;
-                break;
+        // Check for collisions
+        tetrisPieces.forEach(piece => {
+            if (isColliding(newX, newY, playerWidth, playerHeight, piece)) {
+                handleCollision(newX, newY, piece);
             }
-        }
+        });
 
-        if (canMoveY) {
-            playerY = newY >= 0 ? newY : 0;
-            isOnGround = playerY === 0;
-        }
-
-        playerX = newX >= 0 ? (newX <= gameArea.offsetWidth - playerWidth ? newX : gameArea.offsetWidth - playerWidth) : 0;
+        // Update player position
+        playerX = Math.max(0, Math.min(gameArea.offsetWidth - playerWidth, newX));
+        playerY = Math.max(0, newY);
         player.style.left = `${playerX}px`;
         player.style.bottom = `${playerY}px`;
 
         updateTetrisPieces();
     }
 
-    function onTopOfPiece(playerX, playerY, piece) {
-        return playerX + playerWidth > piece.x &&
-               playerX < piece.x + piece.width &&
-               playerY > piece.y &&
-               playerY - playerHeight < piece.y + piece.height;
+    function isColliding(playerX, playerY, playerWidth, playerHeight, piece) {
+        return playerX < piece.x + piece.width &&
+               playerX + playerWidth > piece.x &&
+               playerY < piece.y + piece.height &&
+               playerY + playerHeight > piece.y;
+    }
+
+    function handleCollision(newX, newY, piece) {
+        // Player is above the piece
+        if (newY - velocityY >= piece.y + piece.height) {
+            playerY = piece.y + piece.height;
+            velocityY = 0;
+            isOnGround = true;
+        }
+        // Player is colliding from the sides
+        else if (newX < piece.x + piece.width && newX + playerWidth > piece.x) {
+            playerX = moveRight ? piece.x - playerWidth : piece.x + piece.width;
+        }
     }
 
     function updateTetrisPieces() {
-        let allPiecesStopped = true;
-    
         tetrisPieces.forEach(piece => {
             if (!piece.stopped) {
-                allPiecesStopped = false;
                 piece.y -= 1;
                 piece.element.style.bottom = `${piece.y}px`;
                 if (piece.y <= 0 || intersectsAnyPiece(piece)) {
@@ -103,13 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-    
-        // If all pieces have stopped, spawn a new piece
-        if (allPiecesStopped) {
+
+        if (tetrisPieces.every(piece => piece.stopped)) {
             spawnPiece();
         }
     }
-    
 
     function intersectsAnyPiece(piece) {
         return tetrisPieces.some(otherPiece => 
