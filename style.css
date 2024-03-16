@@ -35,3 +35,26 @@ body {
     right: 10px;
     top: 10px;
 }
+
+@keyframes antigravityShine {
+    0%, 100% {
+      box-shadow: 0 0 10px 10px rgba(255, 255, 0, 0.5);
+      transform: translateY(-10px);
+    }
+    50% {
+      box-shadow: 0 0 20px 20px rgba(255, 255, 0, 0.7);
+      transform: translateY(-20px);
+    }
+  }
+  
+  .tetrisPiece::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    right: 0;
+    bottom: -10px;
+    z-index: -1;
+    animation: antigravityShine 2s infinite alternate;
+  }
+  
