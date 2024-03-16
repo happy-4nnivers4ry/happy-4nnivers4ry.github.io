@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isOnGround = false;
     let moveRight = false;
     let moveLeft = false;
+    let movePieceDownFaster = false;
 
     createPlayer();
     spawnPiece();
@@ -50,59 +51,52 @@ document.addEventListener('DOMContentLoaded', () => {
             width: shape === 'L' ? 40 : 20,
             height: shape === 'L' ? 20 : 60,
             stopped: false,
-            shape: shape
+            shape: shape,
+            movingRight: false,
+            movingLeft: false,
         });
     }
 
-
-    const groundTolerance = 100;
-    
     function onTopOfPiece(playerX, playerY, piece) {
         let effectivePieceHeight = piece.height;
-        
-        // Apply tolerance only if the piece is not stopped and the player is falling
         if (!piece.stopped && velocityY < 0) {
-            effectivePieceHeight += groundTolerance;
+            effectivePieceHeight += 20; // ground tolerance
         }
-        
         return playerX + playerWidth > piece.x &&
                playerX < piece.x + piece.width &&
                playerY + velocityY <= piece.y + effectivePieceHeight &&
                playerY + playerHeight > piece.y;
     }
-    
-    
+
     function update() {
         velocityY += gravity;
         let newX = playerX + (moveRight ? 5 : 0) - (moveLeft ? 5 : 0);
         let newY = playerY + velocityY;
     
         let canMoveY = true;
-        isOnGround = false;  // Assume not on ground until proven otherwise
+        isOnGround = false;
     
-        for (let piece of tetrisPieces) {
+        tetrisPieces.forEach(piece => {
             if (onTopOfPiece(newX, newY, piece)) {
                 canMoveY = false;
-                newY = piece.y + piece.height;  // Player should be on top of the piece
+                newY = piece.y + piece.height;
                 velocityY = 0;
-                isOnGround = true;  // Player is on a piece, hence on ground
+                isOnGround = true;
                 break;
             }
-        }
-    
+        });
+
         if (canMoveY) {
             playerY = newY >= 0 ? newY : 0;
-            // If the player is not moving vertically and is on the bottom, consider it on the ground
             isOnGround = playerY === 0;
         }
-    
+
         playerX = newX >= 0 ? (newX <= gameArea.offsetWidth - playerWidth ? newX : gameArea.offsetWidth - playerWidth) : 0;
         player.style.left = `${playerX}px`;
         player.style.bottom = `${playerY}px`;
     
         updateTetrisPieces();
     }
-        
 
     function updateTetrisPieces() {
         let allPiecesStopped = true;
@@ -110,19 +104,29 @@ document.addEventListener('DOMContentLoaded', () => {
         tetrisPieces.forEach(piece => {
             if (!piece.stopped) {
                 allPiecesStopped = false;
-                piece.y -= 1;
+                let pieceDropSpeed = movePieceDownFaster ? 2 : 1;
+                piece.y -= pieceDropSpeed;
                 piece.element.style.bottom = `${piece.y}px`;
+
+                if (piece.movingRight) {
+                    piece.x = Math.min(gameArea.offsetWidth - piece.width, piece.x + 5);
+                    piece.element.style.left = `${piece.x}px`;
+                } else if (piece.movingLeft) {
+                    piece.x = Math.max(0, piece.x - 5);
+                    piece.element.style.left = `${piece.x}px`;
+                }
+
                 if (piece.y <= 0 || intersectsAnyPiece(piece)) {
                     piece.stopped = true;
                 }
             }
         });
-    
+
         if (allPiecesStopped) {
             spawnPiece();
         }
     }
-    
+
     function intersectsAnyPiece(piece) {
         return tetrisPieces.some(otherPiece => 
             piece !== otherPiece &&
@@ -147,6 +151,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     isOnGround = false;
                 }
                 break;
+            case 'W':
+            case 'w':
+                rotatePiece();
+                break;
+            case 'A':
+            case 'a':
+                movePieceLeft();
+                break;
+            case 'D':
+            case 'd':
+                movePieceRight();
+                break;
+            case 'S':
+            case 's':
+                movePieceDownFaster = true;
+                break;
         }
     }
 
@@ -155,7 +175,29 @@ document.addEventListener('DOMContentLoaded', () => {
             moveRight = false;
         } else if (e.key === 'ArrowLeft') {
             moveLeft = false;
+        } else if (e.key.toLowerCase() === 's') {
+            movePieceDownFaster = false;
+        } else if (e.key.toLowerCase() === 'd') {
+            tetrisPieces.forEach(piece => piece.movingRight = false);
+        } else if (e.key.toLowerCase() === 'a') {
+            tetrisPieces.forEach(piece => piece.movingLeft = false);
         }
+    }
+
+    function rotatePiece() {
+        // Implement rotation logic here
+    }
+
+    function movePieceLeft() {
+        tetrisPieces.forEach(piece => {
+            if (!piece.stopped) piece.movingLeft = true;
+        });
+    }
+
+    function movePieceRight() {
+        tetrisPieces.forEach(piece => {
+            if (!piece.stopped) piece.movingRight = true;
+        });
     }
 
     document.addEventListener('keydown', keydownHandler);
