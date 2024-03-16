@@ -78,28 +78,22 @@ document.addEventListener('DOMContentLoaded', () => {
         let newY = playerY + velocityY;
     
         let canMoveY = true;
-        isOnGround = false; // Assume the player is not on the ground initially
+        isOnGround = false;  // Assume not on ground until proven otherwise
     
         for (let piece of tetrisPieces) {
             if (onTopOfPiece(newX, newY, piece)) {
-                // If the player is on top of any piece, whether it's falling or not, they can jump
-                isOnGround = true;
-                
-                if (!piece.stopped) {
-                    // If the piece is falling, move down with the piece
-                    newY = piece.y + piece.height;
-                } else {
-                    // If the piece is not falling, stand still on the piece
-                    canMoveY = false;
-                    newY = piece.y + piece.height;
-                    velocityY = 0;
-                }
+                canMoveY = false;
+                newY = piece.y + piece.height;  // Player should be on top of the piece
+                velocityY = 0;
+                isOnGround = true;  // Player is on a piece, hence on ground
                 break;
             }
         }
     
         if (canMoveY) {
             playerY = newY >= 0 ? newY : 0;
+            // If the player is not moving vertically and is on the bottom, consider it on the ground
+            isOnGround = playerY === 0;
         }
     
         playerX = newX >= 0 ? (newX <= gameArea.offsetWidth - playerWidth ? newX : gameArea.offsetWidth - playerWidth) : 0;
@@ -108,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
         updateTetrisPieces();
     }
-    
+        
 
     function updateTetrisPieces() {
         let allPiecesStopped = true;
