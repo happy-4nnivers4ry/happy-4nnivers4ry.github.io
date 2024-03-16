@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const player = document.getElementById('player');
     let playerX = 100, playerY = 10;
     let velocityY = 0;
-    const gravity = 0.2;
-    const jumpVelocity = -10;
+    const gravity = -0.2;
+    const jumpVelocity = 10;
     const playerHeight = 60;
     const playerWidth = 20;
     let tetrisPieces = [];
