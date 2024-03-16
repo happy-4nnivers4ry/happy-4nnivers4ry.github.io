@@ -47,7 +47,7 @@ body {
     }
   }
   
-  .tetrisPiece::after {
+.tetrisPiece::after {
     content: '';
     position: absolute;
     top: -10px;
@@ -56,5 +56,4 @@ body {
     bottom: -10px;
     z-index: -1;
     animation: antigravityShine 2s infinite alternate;
-  }
-  
+}
