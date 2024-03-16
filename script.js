@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    const groundTolerance = 40;
+    const groundTolerance = 50;
     
     function onTopOfPiece(playerX, playerY, piece) {
         let effectivePieceHeight = piece.stopped ? piece.height : piece.height + groundTolerance;
