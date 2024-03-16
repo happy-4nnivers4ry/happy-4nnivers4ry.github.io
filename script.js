@@ -139,20 +139,22 @@ document.addEventListener('DOMContentLoaded', () => {
     
     
     function updateTetrisPieces() {
-        if (currentPiece && !currentPiece.stopped) {
-            currentPiece.y -= 1;
-            if (currentPiece.y <= 0 || intersectsAnyPiece(currentPiece.x, currentPiece.y, currentPiece)) {
-                currentPiece.stopped = true;
-                currentPiece = null;
-                spawnPiece();
+        tetrisPieces.forEach(piece => {
+            if (!piece.stopped) {
+                piece.y -= 1;
+                piece.element.style.bottom = `${piece.y}px`;
+                if (piece.y <= 0 || intersectsAnyPiece(piece.x, piece.y, piece)) {
+                    piece.stopped = true;
+                }
             }
-            currentPiece.element.style.bottom = `${currentPiece.y}px`;
+        });
+    
+        // Check if we need to spawn a new piece
+        if (!currentPiece || currentPiece.stopped) {
+            spawnPiece();
         }
     }
     
-
-    
-
     function intersectsAnyPiece(x, y, excludePiece) {
         for (let piece of tetrisPieces) {
             if (piece !== excludePiece && intersects(x, y, excludePiece.width, excludePiece.height, piece.x, piece.y, piece.width, piece.height)) {
@@ -161,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return false;
     }
+    
 
     function intersects(x1, y1, w1, h1, x2, y2, w2, h2) {
         return !(x2 >= x1 + w1 || x2 + w2 <= x1 || y2 >= y1 + h1 || y2 + h2 <= y1);
