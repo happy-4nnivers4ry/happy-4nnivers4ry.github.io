@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const player = document.getElementById('player');
     let playerX = 100, playerY = 10;
     let velocityY = 0;
-    const gravity = -0.2; // Gravity pulls up in this coordinate system
-    const jumpVelocity = 10; // Jump velocity goes down
+    const gravity = -0.2;
+    const jumpVelocity = 10;
     const playerHeight = 60;
     const playerWidth = 20;
     let tetrisPieces = [];
@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         player.style.position = 'absolute';
         player.style.left = `${playerX}px`;
         player.style.bottom = `${playerY}px`;
+        player.style.zIndex = '10';
         gameArea.appendChild(player);
     }
 
@@ -61,9 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Collision and movement logic
         let canMoveY = true;
         for (let piece of tetrisPieces) {
-            if (onTopOfPiece(newX, newY, piece) && newY - playerHeight < piece.y + piece.height) {
+            if (onTopOfPiece(newX, newY, piece)) {
                 canMoveY = false;
-                newY = piece.y + piece.height;  // Adjust player position to stand exactly on top of the piece
+                newY = piece.y + piece.height;
                 velocityY = 0;
                 isOnGround = true;
                 break;
@@ -71,11 +72,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (canMoveY) {
-            playerY = newY;
-            isOnGround = false; // Not on ground if we can move
+            playerY = newY >= 0 ? newY : 0;
+            isOnGround = playerY === 0;
         }
 
-        playerX = Math.max(0, Math.min(gameArea.offsetWidth - playerWidth, newX));
+        playerX = newX >= 0 ? (newX <= gameArea.offsetWidth - playerWidth ? newX : gameArea.offsetWidth - playerWidth) : 0;
         player.style.left = `${playerX}px`;
         player.style.bottom = `${playerY}px`;
 
@@ -85,13 +86,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function onTopOfPiece(playerX, playerY, piece) {
         return playerX + playerWidth > piece.x &&
                playerX < piece.x + piece.width &&
-               playerY > piece.y &&
-               playerY - playerHeight < piece.y + piece.height;
+               playerY + velocityY <= piece.y + piece.height &&
+               playerY + playerHeight > piece.y;
     }
 
     function updateTetrisPieces() {
+        let allPiecesStopped = true;
+    
         tetrisPieces.forEach(piece => {
             if (!piece.stopped) {
+                allPiecesStopped = false;
                 piece.y -= 1;
                 piece.element.style.bottom = `${piece.y}px`;
                 if (piece.y <= 0 || intersectsAnyPiece(piece)) {
@@ -99,8 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-
-        if (tetrisPieces.every(piece => piece.stopped)) {
+    
+        if (allPiecesStopped) {
             spawnPiece();
         }
     }
