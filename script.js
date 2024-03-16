@@ -57,61 +57,76 @@ document.addEventListener('DOMContentLoaded', () => {
         tetrisPieces.push(currentPiece);
     }
 
-    function canMoveTo(newX, newY) {
-        let canMoveHorizontally = true;
-        let canMoveVertically = true;
-    
-        for (let piece of tetrisPieces) {
-            if (intersects(newX, newY, playerHeight, playerHeight, piece.x, piece.y, piece.width, piece.height)) {
-                // Check if the player is trying to move downwards onto a piece
-                if (newY < playerY && newY < piece.y + piece.height && playerY >= piece.y + piece.height) {
-                    canMoveVertically = false; // Block downward movement
-                } else {
-                    // Allow horizontal movement even when intersecting (standing on the piece)
-                    canMoveHorizontally = newX === playerX;
-                }
-            }
-        }
-    
-        // Allow movement if it's only horizontal or only vertical
-        return { horizontal: canMoveHorizontally, vertical: canMoveVertically };
-    }
-    
+
     function update() {
         velocityY += gravity;
     
         let newX = playerX + (moveRight ? 5 : 0) - (moveLeft ? 5 : 0);
         let newY = playerY + velocityY;
     
-        let moveCheck = canMoveTo(newX, newY);
+        let moveCheck = canMoveTo(newX, newY, velocityY);
     
-        // Update playerY if vertical movement is allowed
-        if (moveCheck.vertical) {
+        // Adjust player's position when on a moving piece
+        if (!moveCheck.vertical && newY < playerY) {
+            // If the player is moving down, check if they are on a piece
+            for (let piece of tetrisPieces) {
+                if (onTopOfPiece(playerX, playerY, piece)) {
+                    // Adjust playerY to be on top of the piece, effectively "riding" it down
+                    playerY = piece.y + piece.height;
+                    velocityY = 0; // Reset vertical velocity while on the piece
+                    break;
+                }
+            }
+        } else if (moveCheck.vertical) {
             playerY = newY;
-        } else if (velocityY < 0) {
-            // If downward movement is blocked and velocity is downward, stop vertical movement
-            velocityY = 0;
-            isOnGround = true;
         }
     
-        // Update playerX if horizontal movement is allowed
         if (moveCheck.horizontal) {
             playerX = newX;
         }
     
-        // Check if the player is on the ground or a Tetris piece
-        if (playerY <= 0 || !moveCheck.vertical) {
-            if (playerY <= 0) {
-                playerY = 0;
-            }
+        // Ground check
+        if (playerY <= 0) {
+            playerY = 0;
+            velocityY = 0;
             isOnGround = true;
         } else {
-            isOnGround = false;
+            isOnGround = !moveCheck.vertical;
         }
     
         player.style.left = `${playerX}px`;
         player.style.bottom = `${playerY}px`;
     
+        updateTetrisPieces();
+    }
+    
+    function onTopOfPiece(playerX, playerY, piece) {
+        return playerX < piece.x + piece.width &&
+               playerX + playerWidth > piece.x &&
+               playerY >= piece.y + piece.height &&
+               playerY <= piece.y + piece.height + 10; // Use a small threshold to detect if on top
+    }
+    
+    function canMoveTo(newX, newY, velocityY) {
+        let canMoveHorizontally = true;
+        let canMoveVertically = true;
+    
+        for (let piece of tetrisPieces) {
+            if (intersects(newX, newY, playerHeight, playerHeight, piece.x, piece.y, piece.width, piece.height)) {
+                // Check if the player is above the piece
+                if (velocityY <= 0 && newY - playerHeight < piece.y + piece.height && playerY - playerHeight >= piece.y + piece.height) {
+                    canMoveVertically = false; // Block downward movement
+                } else {
+                    // Allow horizontal movement when intersecting
+                    canMoveHorizontally = newX === playerX;
+                }
+            }
+        }
+    
+        return { horizontal: canMoveHorizontally, vertical: canMoveVertically };
+    }
+    
+    function updateTetrisPieces() {
         if (currentPiece && !currentPiece.stopped) {
             currentPiece.y -= 1;
             if (currentPiece.y <= 0 || intersectsAnyPiece(currentPiece.x, currentPiece.y, currentPiece)) {
