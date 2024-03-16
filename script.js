@@ -85,17 +85,25 @@ document.addEventListener('DOMContentLoaded', () => {
     
         let moveCheck = canMoveTo(newX, newY);
     
+        // Update playerY if vertical movement is allowed
         if (moveCheck.vertical) {
             playerY = newY;
+        } else if (velocityY < 0) {
+            // If downward movement is blocked and velocity is downward, stop vertical movement
+            velocityY = 0;
+            isOnGround = true;
         }
     
+        // Update playerX if horizontal movement is allowed
         if (moveCheck.horizontal) {
             playerX = newX;
         }
     
-        if (playerY <= 0) {
-            playerY = 0;
-            velocityY = 0;
+        // Check if the player is on the ground or a Tetris piece
+        if (playerY <= 0 || !moveCheck.vertical) {
+            if (playerY <= 0) {
+                playerY = 0;
+            }
             isOnGround = true;
         } else {
             isOnGround = false;
@@ -114,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentPiece.element.style.bottom = `${currentPiece.y}px`;
         }
     }
+    
 
     
 
