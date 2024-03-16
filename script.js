@@ -58,30 +58,32 @@ document.addEventListener('DOMContentLoaded', () => {
         velocityY += gravity;
         let newX = playerX + (moveRight ? 5 : 0) - (moveLeft ? 5 : 0);
         let newY = playerY + velocityY;
-
+    
         // Collision and movement logic
         let canMoveY = true;
+        isOnGround = false;  // Assume the player is not on the ground until proven otherwise
         for (let piece of tetrisPieces) {
             if (onTopOfPiece(newX, newY, piece)) {
                 canMoveY = false;
-                newY = piece.y + piece.height;
+                newY = piece.y + piece.height;  // Correctly align the player on top of the block
                 velocityY = 0;
-                isOnGround = true;
+                isOnGround = true;  // Player is on a block, hence considered on the ground
                 break;
             }
         }
-
+    
         if (canMoveY) {
             playerY = newY >= 0 ? newY : 0;
-            isOnGround = playerY === 0;
+            isOnGround = isOnGround || playerY === 0;  // Player is on the ground if they're at the bottom of the game area
         }
-
+    
         playerX = newX >= 0 ? (newX <= gameArea.offsetWidth - playerWidth ? newX : gameArea.offsetWidth - playerWidth) : 0;
         player.style.left = `${playerX}px`;
         player.style.bottom = `${playerY}px`;
-
+    
         updateTetrisPieces();
     }
+    
 
     function onTopOfPiece(playerX, playerY, piece) {
         return playerX + playerWidth > piece.x &&
