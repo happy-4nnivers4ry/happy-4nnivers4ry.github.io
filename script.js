@@ -102,18 +102,16 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTetrisPieces();
     }
     
-    
     function canMoveTo(newX, newY) {
         let canMoveHorizontally = true;
         let canMoveVertically = true;
     
         for (let piece of tetrisPieces) {
             if (intersects(newX, newY, playerWidth, playerHeight, piece.x, piece.y, piece.width, piece.height)) {
-                // Check if the player is coming from above the piece
-                if (newY - playerHeight < piece.y + piece.height && playerY - playerHeight >= piece.y) {
+                // Check if the player is coming from above the piece and moving downward
+                if (newY - playerHeight < piece.y + piece.height && playerY - playerHeight >= piece.y && velocityY < 0) {
                     canMoveVertically = false;
-                } else {
-                    canMoveHorizontally = newX === playerX;
+                    break;  // No need to check other pieces if one prevents vertical movement
                 }
             }
         }
@@ -124,12 +122,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function findLandingPiece(playerX, playerY) {
         for (let piece of tetrisPieces) {
             if (playerX < piece.x + piece.width && playerX + playerWidth > piece.x &&
-                playerY - playerHeight <= piece.y + piece.height && playerY > piece.y) {
+                playerY - playerHeight <= piece.y + piece.height && playerY - playerHeight > piece.y) {
                 return piece;
             }
         }
         return null;
     }
+    
     
     function onTopOfPiece(playerX, playerY, piece) {
         return playerX < piece.x + piece.width &&
