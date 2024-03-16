@@ -54,27 +54,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+
+    const groundTolerance = 20;
+
+    function onTopOfPiece(playerX, playerY, piece) {
+        let effectivePieceHeight = piece.stopped ? piece.height : piece.height + groundTolerance;
+        
+        return playerX + playerWidth > piece.x &&
+               playerX < piece.x + piece.width &&
+               playerY + velocityY <= piece.y + effectivePieceHeight &&
+               playerY + playerHeight > piece.y;
+    }
+    
     function update() {
         velocityY += gravity;
         let newX = playerX + (moveRight ? 5 : 0) - (moveLeft ? 5 : 0);
         let newY = playerY + velocityY;
     
-        // Collision and movement logic
         let canMoveY = true;
-        isOnGround = false;  // Assume the player is not on the ground until proven otherwise
         for (let piece of tetrisPieces) {
             if (onTopOfPiece(newX, newY, piece)) {
                 canMoveY = false;
-                newY = piece.y + piece.height;  // Correctly align the player on top of the block
+                newY = piece.stopped ? piece.y + piece.height : piece.y + piece.height + groundTolerance - playerHeight;
                 velocityY = 0;
-                isOnGround = true;  // Player is on a block, hence considered on the ground
+                isOnGround = true;
                 break;
             }
         }
     
         if (canMoveY) {
             playerY = newY >= 0 ? newY : 0;
-            isOnGround = isOnGround || playerY === 0;  // Player is on the ground if they're at the bottom of the game area
+            isOnGround = playerY === 0;
         }
     
         playerX = newX >= 0 ? (newX <= gameArea.offsetWidth - playerWidth ? newX : gameArea.offsetWidth - playerWidth) : 0;
@@ -83,17 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
         updateTetrisPieces();
     }
-    
-
-    const groundTolerance = 50;  // Adjust this value as needed
-
-    function onTopOfPiece(playerX, playerY, piece) {
-        return playerX + playerWidth > piece.x &&
-               playerX < piece.x + piece.width &&
-               playerY + velocityY <= piece.y + piece.height + groundTolerance &&  // Add tolerance in Y-axis check
-               playerY + playerHeight > piece.y;
-    }
-    
 
     function updateTetrisPieces() {
         let allPiecesStopped = true;
