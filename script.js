@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let playerX = 100, playerY = 10;
     let velocityY = 0;
     const gravity = -0.2;
-    const jumpVelocity = 10;
+    const jumpVelocity = 5;
     const playerHeight = 60;
     const playerWidth = 20;
     let tetrisPieces = [];
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    const groundTolerance = 50;
+    const groundTolerance = 30;
     
     function onTopOfPiece(playerX, playerY, piece) {
         let effectivePieceHeight = piece.stopped ? piece.height : piece.height + groundTolerance;
