@@ -58,13 +58,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const groundTolerance = 50;
     
     function onTopOfPiece(playerX, playerY, piece) {
-        let effectivePieceHeight = piece.stopped ? piece.height : piece.height + groundTolerance;
+        let effectivePieceHeight = piece.height;
+        
+        // Apply tolerance only if the piece is not stopped and the player is falling
+        if (!piece.stopped && velocityY < 0) {
+            effectivePieceHeight += groundTolerance;
+        }
         
         return playerX + playerWidth > piece.x &&
                playerX < piece.x + piece.width &&
                playerY + velocityY <= piece.y + effectivePieceHeight &&
                playerY + playerHeight > piece.y;
     }
+    
     
     function update() {
         velocityY += gravity;
