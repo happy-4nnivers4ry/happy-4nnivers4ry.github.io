@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let playerX = 100, playerY = 10;
     let velocityY = 0;
     const gravity = -0.1;
-    const jumpVelocity = 8;
+    const jumpVelocity = 5;
     const playerHeight = 60;
     const playerWidth = 20;
     let tetrisPieces = [];
