@@ -8,11 +8,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const playerHeight = 60;
     const playerWidth = 20;
     let tetrisPieces = [];
-    let currentPiece = null;
     let isOnGround = false;
     let moveRight = false;
     let moveLeft = false;
-
+    let movePieceLeft = false;
+    let movePieceRight = false;
+    let rotatePiece = false;
+    let speedUp = false;
+    
     createPlayer();
     spawnPiece();
 
@@ -28,9 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function spawnPiece() {
-        const piece = createTetrisPiece();
-        currentPiece = piece;
-        tetrisPieces.push(piece);
+        createTetrisPiece();
     }
 
     function createTetrisPiece() {
@@ -46,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         piece.style.bottom = `${gameArea.offsetHeight}px`;
         gameArea.appendChild(piece);
 
-        return {
+        tetrisPieces.push({
             element: piece,
             x: parseFloat(piece.style.left),
             y: parseFloat(piece.style.bottom),
@@ -54,22 +55,73 @@ document.addEventListener('DOMContentLoaded', () => {
             height: shape === 'L' ? 20 : 60,
             stopped: false,
             shape: shape
-        };
+        });
     }
 
-    function rotatePiece(piece) {
-        if (piece.shape === 'L') {
-            if (piece.width === 40) {
-                piece.width = 20;
-                piece.height = 40;
-            } else {
-                piece.width = 40;
-                piece.height = 20;
-            }
-            piece.element.style.width = `${piece.width}px`;
-            piece.element.style.height = `${piece.height}px`;
+
+    const groundTolerance = 20;
+    
+    function onTopOfPiece(playerX, playerY, piece) {
+        let effectivePieceHeight = piece.height;
+        
+        // Apply tolerance only if the piece is not stopped and the player is falling
+        if (!piece.stopped && velocityY < 0) {
+            effectivePieceHeight += groundTolerance;
         }
+        
+        return playerX + playerWidth > piece.x &&
+               playerX < piece.x + piece.width &&
+               playerY + velocityY <= piece.y + effectivePieceHeight &&
+               playerY + playerHeight > piece.y;
     }
+    
+    
+    function update() {
+        velocityY += gravity;
+        let newX = playerX + (moveRight ? 5 : 0) - (moveLeft ? 5 : 0);
+        let newY = playerY + velocityY;
+    
+        let canMoveY = true;
+        isOnGround = false;  // Assume not on ground until proven otherwise
+    
+        for (let piece of tetrisPieces) {
+            if (onTopOfPiece(newX, newY, piece)) {
+                canMoveY = false;
+                newY = piece.y + piece.height;  // Player should be on top of the piece
+                velocityY = 0;
+                isOnGround = true;  // Player is on a piece, hence on ground
+                break;
+            }
+        }
+    
+        if (canMoveY) {
+            playerY = newY >= 0 ? newY : 0;
+            // If the player is not moving vertically and is on the bottom, consider it on the ground
+            isOnGround = playerY === 0;
+        }
+    
+        playerX = newX >= 0 ? (newX <= gameArea.offsetWidth - playerWidth ? newX : gameArea.offsetWidth - playerWidth) : 0;
+        player.style.left = `${playerX}px`;
+        player.style.bottom = `${playerY}px`;
+    
+        updateTetrisPieces();
+    }
+
+    function rotateTetrisPiece(piece) {
+        // For simplicity, toggle between 'I' and 'L' shapes. Implement as needed.
+        if (piece.shape === 'I') {
+            piece.shape = 'L';
+            piece.width = 40;
+            piece.height = 20;
+        } else if (piece.shape === 'L') {
+            piece.shape = 'I';
+            piece.width = 20;
+            piece.height = 60;
+        }
+        piece.element.style.width = `${piece.width}px`;
+        piece.element.style.height = `${piece.height}px`;
+    }
+           
 
     function updateTetrisPieces() {
         let allPiecesStopped = true;
@@ -77,19 +129,36 @@ document.addEventListener('DOMContentLoaded', () => {
         tetrisPieces.forEach(piece => {
             if (!piece.stopped) {
                 allPiecesStopped = false;
-                piece.y -= 1;
+                
+                // Move the piece left or right
+                if (movePieceLeft) piece.x -= 5;
+                if (movePieceRight) piece.x += 5;
+                piece.element.style.left = `${piece.x}px`;
+    
+                // Speed up the piece's descent
+                let speed = speedUp ? 5 : 1;
+    
+                // Rotate the piece
+                if (rotatePiece) {
+                    rotateTetrisPiece(piece);
+                    rotatePiece = false; // Reset after rotation
+                }
+    
+                piece.y -= speed;
                 piece.element.style.bottom = `${piece.y}px`;
+    
                 if (piece.y <= 0 || intersectsAnyPiece(piece)) {
                     piece.stopped = true;
                 }
             }
         });
     
-        if (allPiecesStopped && currentPiece.stopped) {
+        if (allPiecesStopped) {
             spawnPiece();
         }
     }
-
+    
+    
     function intersectsAnyPiece(piece) {
         return tetrisPieces.some(otherPiece => 
             piece !== otherPiece &&
@@ -114,39 +183,36 @@ document.addEventListener('DOMContentLoaded', () => {
                     isOnGround = false;
                 }
                 break;
-            case 'W':
-                if (currentPiece && !currentPiece.stopped) {
-                    rotatePiece(currentPiece);
-                }
+            case 'a':
+                movePieceLeft = true;
                 break;
-            case 'A':
-                if (currentPiece && !currentPiece.stopped) {
-                    currentPiece.x = Math.max(0, currentPiece.x - 10);
-                    currentPiece.element.style.left = `${currentPiece.x}px`;
-                }
+            case 'd':
+                movePieceRight = true;
                 break;
-            case 'D':
-                if (currentPiece && !currentPiece.stopped) {
-                    currentPiece.x = Math.min(gameArea.offsetWidth - currentPiece.width, currentPiece.x + 10);
-                    currentPiece.element.style.left = `${currentPiece.x}px`;
-                }
+            case 'w':
+                rotatePiece = true;
                 break;
-            case 'S':
-                if (currentPiece && !currentPiece.stopped) {
-                    currentPiece.y = Math.max(0, currentPiece.y - 10);
-                    currentPiece.element.style.bottom = `${currentPiece.y}px`;
-                }
+            case 's':
+                speedUp = true;
                 break;
         }
     }
-
+    
     function keyupHandler(e) {
         if (e.key === 'ArrowRight') {
             moveRight = false;
         } else if (e.key === 'ArrowLeft') {
             moveLeft = false;
+        } else if (e.key === 'a') {
+            movePieceLeft = false;
+        } else if (e.key === 'd') {
+            movePieceRight = false;
+        } else if (e.key === 's') {
+            speedUp = false;
         }
+        // No need to add a case for 'w' since rotation is a one-time action per key press
     }
+    
 
     document.addEventListener('keydown', keydownHandler);
     document.addEventListener('keyup', keyupHandler);
