@@ -141,7 +141,86 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Other functions (onTopOfPiece, updateTetrisPieces, intersectsAnyPiece, intersects, keydownHandler, keyupHandler) remain the same.
+    function updateTetrisPieces() {
+        tetrisPieces.forEach(piece => {
+            if (!piece.stopped) {
+                if (movePieceLeft) piece.x -= 5;
+                if (movePieceRight) piece.x += 5;
+                piece.element.style.left = `${piece.x}px`;
+
+                let speed = speedUp ? 5 : 1;
+                if (rotatePiece) {
+                    rotateTetrisPiece(piece);
+                    rotatePiece = false;
+                }
+
+                piece.y -= speed;
+                piece.element.style.bottom = `${piece.y}px`;
+
+                if (piece.y <= 0 || intersectsAnyPiece(piece)) {
+                    piece.stopped = true;
+                }
+            }
+        });
+
+        if (tetrisPieces.filter(p => !p.stopped).length === 0 && pieceCount < 10) {
+            spawnPiece();
+        }
+    }
+
+    function intersectsAnyPiece(piece) {
+        return tetrisPieces.some(otherPiece => 
+            piece !== otherPiece &&
+            intersects(piece.x, piece.y, piece.width, piece.height, otherPiece.x, otherPiece.y, otherPiece.width, otherPiece.height));
+    }
+
+    function intersects(x1, y1, w1, h1, x2, y2, w2, h2) {
+        return !(x2 >= x1 + w1 || x2 + w2 <= x1 || y2 >= y1 + h1 || y2 + h2 <= y1);
+    }
+
+    function keydownHandler(e) {
+        switch (e.key) {
+            case 'ArrowRight':
+                moveRight = true;
+                break;
+            case 'ArrowLeft':
+                moveLeft = true;
+                break;
+            case 'ArrowUp':
+                if (isOnGround) {
+                    velocityY = jumpVelocity;
+                    isOnGround = false;
+                }
+                break;
+            case 'a':
+                movePieceLeft = true;
+                break;
+            case 'd':
+                movePieceRight = true;
+                break;
+            case 'w':
+                rotatePiece = true;
+                break;
+            case 's':
+                speedUp = true;
+                break;
+        }
+    }
+    
+    function keyupHandler(e) {
+        if (e.key === 'ArrowRight') {
+            moveRight = false;
+        } else if (e.key === 'ArrowLeft') {
+            moveLeft = false;
+        } else if (e.key === 'a') {
+            movePieceLeft = false;
+        } else if (e.key === 'd') {
+            movePieceRight = false;
+        } else if (e.key === 's') {
+            speedUp = false;
+        }
+        // No need to add a case for 'w' since rotation is a one-time action per key press
+    }
 
     document.addEventListener('keydown', keydownHandler);
     document.addEventListener('keyup', keyupHandler);
