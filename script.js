@@ -1,12 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     const gameArea = document.getElementById('gameArea');
     const player = document.getElementById('player');
+    const pointA = document.getElementById('pointA');
     const pointB = document.getElementById('pointB');
+    const scoreElement = document.getElementById('score');
+    const messageElement = document.getElementById('message');
     let playerX = 100, playerY = 10;
     let velocityY = 0;
     const gravity = -0.1;
     const jumpVelocity = 7;
-    const playerHeight = 60;
+    const playerHeight = 20;
     const playerWidth = 20;
     let tetrisPieces = [];
     let isOnGround = false;
@@ -16,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let movePieceRight = false;
     let rotatePiece = false;
     let speedUp = false;
-    let pieceCounter = 0;
+    let score = 0;
+    let gameSpeed = 1;
 
     createPlayer();
     spawnPiece();
@@ -33,32 +37,58 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function spawnPiece() {
-        if (pieceCounter < 10) {
-            createTetrisPiece();
-            pieceCounter++;
-        }
+        createTetrisPiece();
     }
 
     function createTetrisPiece() {
-        const shapes = ['I', 'L', 'T', 'Z'];
+        const shapes = ['I', 'L', 'T', 'Z', 'O'];
         const shape = shapes[Math.floor(Math.random() * shapes.length)];
         const piece = document.createElement('div');
         piece.className = 'tetrisPiece';
 
         let pieceWidth, pieceHeight;
+        let pieceShape = [];
+
         switch (shape) {
             case 'I':
-                pieceWidth = 20;
-                pieceHeight = 60;
+                pieceWidth = 80;
+                pieceHeight = 20;
+                pieceShape = [
+                    [1, 1, 1, 1]
+                ];
                 break;
             case 'L':
-                pieceWidth = 40;
-                pieceHeight = 20;
+                pieceWidth = 60;
+                pieceHeight = 40;
+                pieceShape = [
+                    [1, 0],
+                    [1, 0],
+                    [1, 1]
+                ];
                 break;
             case 'T':
+                pieceWidth = 60;
+                pieceHeight = 40;
+                pieceShape = [
+                    [1, 1, 1],
+                    [0, 1, 0]
+                ];
+                break;
             case 'Z':
                 pieceWidth = 60;
-                pieceHeight = 20;
+                pieceHeight = 40;
+                pieceShape = [
+                    [1, 1, 0],
+                    [0, 1, 1]
+                ];
+                break;
+            case 'O':
+                pieceWidth = 40;
+                pieceHeight = 40;
+                pieceShape = [
+                    [1, 1],
+                    [1, 1]
+                ];
                 break;
         }
 
@@ -77,24 +107,25 @@ document.addEventListener('DOMContentLoaded', () => {
             width: pieceWidth,
             height: pieceHeight,
             stopped: false,
-            shape: shape
+            shape: pieceShape
         });
     }
 
     function rotateTetrisPiece(piece) {
-        if (piece.shape === 'T' || piece.shape === 'Z') {
-            let temp = piece.width;
-            piece.width = piece.height;
-            piece.height = temp;
-        } else if (piece.shape === 'I') {
-            piece.shape = 'L';
-            piece.width = 40;
-            piece.height = 20;
-        } else if (piece.shape === 'L') {
-            piece.shape = 'I';
-            piece.width = 20;
-            piece.height = 60;
+        const newShape = [];
+        const rows = piece.shape.length;
+        const cols = piece.shape[0].length;
+
+        for (let col = 0; col < cols; col++) {
+            const newRow = [];
+            for (let row = rows - 1; row >= 0; row--) {
+                newRow.push(piece.shape[row][col]);
+            }
+            newShape.push(newRow);
         }
+
+        piece.shape = newShape;
+        [piece.width, piece.height] = [piece.height, piece.width];
         piece.element.style.width = `${piece.width}px`;
         piece.element.style.height = `${piece.height}px`;
     }
@@ -106,11 +137,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (movePieceRight && piece.x + piece.width < gameArea.offsetWidth) piece.x += 5;
                 piece.element.style.left = `${piece.x}px`;
 
-                let speed = speedUp ? 5 : 1;
+                let speed = speedUp ? 5 * gameSpeed : 1 * gameSpeed;
 
                 if (rotatePiece && !piece.rotated) {
                     rotateTetrisPiece(piece);
-                    piece.rotated = true;  // Ensure it doesn't keep rotating
+                    piece.rotated = true;
                 }
 
                 piece.y -= speed;
@@ -124,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        if (tetrisPieces.every(piece => piece.stopped) && pieceCounter < 10) {
+        if (tetrisPieces.every(piece => piece.stopped)) {
             spawnPiece();
         }
     }
@@ -140,12 +171,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetGame() {
-        playerX = 100;
+        playerX = Math.random() * (gameArea.offsetWidth - playerWidth);
         playerY = 10;
         velocityY = 0;
         tetrisPieces.forEach(piece => gameArea.removeChild(piece.element));
         tetrisPieces = [];
-        pieceCounter = 0;
+        gameSpeed += 0.1;
+        pointB.style.top = `${Math.random() * 50}px`;
+        pointB.style.right = `${Math.random() * (gameArea.offsetWidth - 20)}px`;
         spawnPiece();
     }
 
@@ -154,8 +187,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const playerRect = player.getBoundingClientRect();
         if (playerRect.right > pointBRect.left && playerRect.left < pointBRect.right &&
             playerRect.bottom < pointBRect.bottom && playerRect.top > pointBRect.top) {
+            showSuccessMessage();
+            score++;
+            scoreElement.textContent = `Score: ${score}`;
             resetGame();
         }
+    }
+
+    function showSuccessMessage() {
+        messageElement.textContent = 'Success!';
+        messageElement.style.display = 'block';
+        setTimeout(() => {
+            messageElement.style.display = 'none';
+        }, 2000);
     }
 
     function onTopOfPiece(playerX, playerY, piece) {
@@ -240,7 +284,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 movePieceRight = false;
                 break;
             case 'w':
-                rotatePiece = false; // Allow for subsequent rotations
+                rotatePiece = false;
+                tetrisPieces.forEach(piece => piece.rotated = false);
                 break;
             case 's':
                 speedUp = false;

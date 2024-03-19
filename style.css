@@ -26,44 +26,20 @@ body {
     background-color: blue;
 }
 
-#pointA {
-    left: 10px;
-    bottom: 10px;
-}
-
-#pointB {
-    right: 10px;
+#score {
+    position: absolute;
     top: 10px;
+    left: 10px;
+    font-size: 18px;
+    color: #000;
 }
 
-
-@keyframes antigravityShine {
-    0%, 100% {
-        background-color: green;
-        box-shadow: 0 0 10px limegreen, 0 0 20px limegreen, 0 0 30px limegreen;
-        opacity: 0.7;
-    }
-    50% {
-        background-color: yellow;
-        box-shadow: 0 0 20px yellow, 0 0 40px yellow, 0 0 60px yellow;
-        opacity: 1;
-    }
-}
-
-.tetrisPiece::after {
-    content: '';
+#message {
     position: absolute;
-    top: -10px;
-    left: 0;
-    right: 0;
-    bottom: -10px;
-    z-index: -1;
-    border-radius: 4px; /* Adjust to match your tetrisPiece border-radius, if any */
-    animation: antigravityShine 2s infinite ease-in-out;
-}
-
-.tetrisPiece {
-    position: absolute;
-    /* Your existing styles for tetrisPiece */
-    overflow: hidden; /* This will ensure the ::after pseudo-element does not overflow the tetrisPiece */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    color: #000;
+    display: none;
 }
