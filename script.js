@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
             spike.style.position = 'absolute';
             spike.style.width = '20px';
             spike.style.height = '20px';
-            spike.style.backgroundColor = 'green';
+            spike.style.backgroundColor = 'purple';
             spike.style.left = `${Math.random() * (gameArea.offsetWidth - 20)}px`;
             spike.style.bottom = `${Math.random() * (gameArea.offsetHeight - 20)}px`;
             gameArea.appendChild(spike);
