@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newShape = [];
         const rows = piece.shape.length;
         const cols = piece.shape[0].length;
-
+    
         for (let col = 0; col < cols; col++) {
             const newRow = [];
             for (let row = rows - 1; row >= 0; row--) {
@@ -141,30 +141,53 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             newShape.push(newRow);
         }
-
+    
         piece.shape = newShape;
         [piece.width, piece.height] = [piece.height, piece.width];
+    
+        // Clear existing blocks
+        while (piece.element.firstChild) {
+            piece.element.removeChild(piece.element.firstChild);
+        }
+    
+        // Render the rotated piece shape
+        for (let row = 0; row < piece.shape.length; row++) {
+            for (let col = 0; col < piece.shape[row].length; col++) {
+                if (piece.shape[row][col] === 1) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    block.style.position = 'absolute';
+                    block.style.width = `${piece.width / piece.shape[row].length}px`;
+                    block.style.height = `${piece.height / piece.shape.length}px`;
+                    block.style.backgroundColor = 'green';
+                    block.style.left = `${col * (piece.width / piece.shape[row].length)}px`;
+                    block.style.bottom = `${row * (piece.height / piece.shape.length)}px`;
+                    piece.element.appendChild(block);
+                }
+            }
+        }
+    
         piece.element.style.width = `${piece.width}px`;
         piece.element.style.height = `${piece.height}px`;
     }
-
+    
     function updateTetrisPieces() {
         tetrisPieces.forEach(piece => {
             if (!piece.stopped) {
                 if (movePieceLeft && piece.x > 0) piece.x -= 5;
                 if (movePieceRight && piece.x + piece.width < gameArea.offsetWidth) piece.x += 5;
                 piece.element.style.left = `${piece.x}px`;
-
+    
                 let speed = speedUp ? 5 * gameSpeed : 1 * gameSpeed;
-
+    
                 if (rotatePiece && !piece.rotated) {
                     rotateTetrisPiece(piece);
                     piece.rotated = true;
                 }
-
+    
                 piece.y -= speed;
                 piece.element.style.bottom = `${piece.y}px`;
-
+    
                 if (piece.y <= 0 || intersectsAnyPiece(piece)) {
                     piece.stopped = true;
                     piece.y = Math.max(piece.y, 0);
@@ -172,11 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-
+    
         if (tetrisPieces.every(piece => piece.stopped)) {
             spawnPiece();
         }
     }
+    
+    
 
     function intersectsAnyPiece(currentPiece) {
         return tetrisPieces.some(piece => {
@@ -192,10 +217,12 @@ document.addEventListener('DOMContentLoaded', () => {
         playerX = Math.random() * (gameArea.offsetWidth - playerWidth);
         playerY = 10;
         velocityY = 0;
-        tetrisPieces.forEach(piece => gameArea.removeChild(piece.element));
+        tetrisPieces.forEach(piece => {
+            gameArea.removeChild(piece.element);
+        });
         tetrisPieces = [];
         gameSpeed += 0.1;
-        pointB.style.top = `${Math.random() * 50}px`;
+        pointB.style.top = `${Math.random() * (gameArea.offsetHeight - 20)}px`;
         pointB.style.right = `${Math.random() * (gameArea.offsetWidth - 20)}px`;
         spawnPiece();
     }
@@ -204,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pointBRect = pointB.getBoundingClientRect();
         const playerRect = player.getBoundingClientRect();
         if (playerRect.right > pointBRect.left && playerRect.left < pointBRect.right &&
-            playerRect.bottom < pointBRect.bottom && playerRect.top > pointBRect.top) {
+            playerRect.bottom > pointBRect.top && playerRect.top < pointBRect.bottom) {
             showSuccessMessage();
             score++;
             scoreElement.textContent = `Score: ${score}`;
