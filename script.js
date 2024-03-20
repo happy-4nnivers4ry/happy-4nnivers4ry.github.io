@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         spikes = [];
         gameSpeed *= 1.2;
         piecesSpawned = 0;
-        pointB.style.top = `${Math.max(Math.random() * (gameArea.offsetHeight - 100), 100)}px`;
+        pointB.style.top = `${Math.max(Math.random() * (gameArea.offsetHeight - 30), 100)}px`;
         pointB.style.right = `${Math.random() * (gameArea.offsetWidth - 20)}px`;
         spawnPiece();
         spawnSpikes();
