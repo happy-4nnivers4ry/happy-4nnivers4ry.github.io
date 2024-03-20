@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isInvincible = false;
     let invincibilityTimeout;
     let levelTimeout;
-    let timeRemaining = 30;
+    let timeRemaining = 10000;
     let highScore = 0;
 
     createPlayer();
@@ -413,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startTimer() {
-        timerElement.textContent = `Time: ${timeRemaining}s`;
+        timerElement.textContent = `Time: ${timeRemaining}ms`;
         levelTimeout = setTimeout(() => {
             resetGame();
         }, timeRemaining * 1000);
