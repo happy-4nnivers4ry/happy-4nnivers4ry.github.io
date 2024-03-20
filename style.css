@@ -15,6 +15,12 @@ body {
     overflow: hidden;
 }
 
+.spike {
+    position: absolute;
+    background-color: red;
+}
+
+
 #player, #pointA, #pointB {
     position: absolute;
     width: 20px;
