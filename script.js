@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         spikes = [];
         gameSpeed *= 1.2;
         piecesSpawned = 0;
-        pointB.style.top = `${Math.max(Math.random() * (gameArea.offsetHeight * 0.2), gameArea.offsetHeight * 0.8)}px`;
+        pointB.style.top = `${Math.min(Math.random() * (gameArea.offsetHeight * 0.2), gameArea.offsetHeight * 0.2)}px`;
         pointB.style.right = `${Math.random() * (gameArea.offsetWidth - 20)}px`;
         spawnPiece();
         spawnSpikes();
@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
             spike.style.position = 'absolute';
             spike.style.width = '20px';
             spike.style.height = '20px';
-            spike.style.backgroundColor = 'red';
+            spike.style.backgroundColor = 'green';
             spike.style.left = `${Math.random() * (gameArea.offsetWidth - 20)}px`;
             spike.style.bottom = `${Math.random() * (gameArea.offsetHeight - 20)}px`;
             gameArea.appendChild(spike);
