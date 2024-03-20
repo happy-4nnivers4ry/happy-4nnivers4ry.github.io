@@ -43,3 +43,12 @@ body {
     color: #000;
     display: none;
 }
+
+.tetrisPiece {
+    position: absolute;
+}
+
+.block {
+    position: absolute;
+    background-color: green;
+}

@@ -45,10 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const shape = shapes[Math.floor(Math.random() * shapes.length)];
         const piece = document.createElement('div');
         piece.className = 'tetrisPiece';
-
+    
         let pieceWidth, pieceHeight;
         let pieceShape = [];
-
+    
         switch (shape) {
             case 'I':
                 pieceWidth = 80;
@@ -91,15 +91,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 ];
                 break;
         }
-
+    
         piece.style.width = `${pieceWidth}px`;
         piece.style.height = `${pieceHeight}px`;
-        piece.style.backgroundColor = 'green';
         piece.style.position = 'absolute';
         piece.style.left = `${Math.random() * (gameArea.offsetWidth - pieceWidth)}px`;
         piece.style.bottom = `${gameArea.offsetHeight}px`;
+    
+        // Render the piece shape
+        for (let row = 0; row < pieceShape.length; row++) {
+            for (let col = 0; col < pieceShape[row].length; col++) {
+                if (pieceShape[row][col] === 1) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    block.style.position = 'absolute';
+                    block.style.width = `${pieceWidth / pieceShape[row].length}px`;
+                    block.style.height = `${pieceHeight / pieceShape.length}px`;
+                    block.style.backgroundColor = 'green';
+                    block.style.left = `${col * (pieceWidth / pieceShape[row].length)}px`;
+                    block.style.bottom = `${row * (pieceHeight / pieceShape.length)}px`;
+                    piece.appendChild(block);
+                }
+            }
+        }
+    
         gameArea.appendChild(piece);
-
+    
         tetrisPieces.push({
             element: piece,
             x: parseFloat(piece.style.left),
@@ -110,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
             shape: pieceShape
         });
     }
+    
 
     function rotateTetrisPiece(piece) {
         const newShape = [];
@@ -193,7 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
             resetGame();
         }
     }
-
+    
+    
     function showSuccessMessage() {
         messageElement.textContent = 'Success!';
         messageElement.style.display = 'block';
