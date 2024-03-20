@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
             createTetrisPiece();
             piecesSpawned++;
         }
+    }
 
     function createTetrisPiece() {
         const shapes = ['I', 'L', 'T', 'Z', 'O'];
@@ -173,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         piece.element.style.height = `${piece.height}px`;
     }
     
+
     function updateTetrisPieces() {
         tetrisPieces.forEach(piece => {
             if (!piece.stopped) {
@@ -198,11 +200,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     
-        if (tetrisPieces.every(piece => piece.stopped)) {
+        if (tetrisPieces.every(piece => piece.stopped) && piecesSpawned < 10) {
             spawnPiece();
         }
     }
-    
     
 
     function intersectsAnyPiece(currentPiece) {
@@ -224,9 +225,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         tetrisPieces = [];
         gameSpeed *= 1.2; // Increase the speed by 20% each level
+        piecesSpawned = 0;
         pointB.style.top = `${Math.random() * (gameArea.offsetHeight - 20)}px`;
         pointB.style.right = `${Math.random() * (gameArea.offsetWidth - 20)}px`;
-        piecesSpawned = 0;
         spawnPiece();
     }
 
@@ -242,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    
+
     function showSuccessMessage() {
         messageElement.textContent = 'Success!';
         messageElement.style.display = 'block';
