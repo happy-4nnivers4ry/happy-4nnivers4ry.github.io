@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const gameArea = document.getElementById('gameArea');
     const player = document.getElementById('player');
-    const pointA = document.getElementById('pointA');
     const pointB = document.getElementById('pointB');
     const scoreElement = document.getElementById('score');
     const messageElement = document.getElementById('message');
@@ -21,7 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let speedUp = false;
     let score = 0;
     let gameSpeed = 1;
-
+    let piecesSpawned = 0;
+    
     createPlayer();
     spawnPiece();
 
@@ -37,8 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function spawnPiece() {
-        createTetrisPiece();
-    }
+        if (piecesSpawned < 10) {
+            createTetrisPiece();
+            piecesSpawned++;
+        }
 
     function createTetrisPiece() {
         const shapes = ['I', 'L', 'T', 'Z', 'O'];
@@ -221,9 +223,10 @@ document.addEventListener('DOMContentLoaded', () => {
             gameArea.removeChild(piece.element);
         });
         tetrisPieces = [];
-        gameSpeed += 0.1;
+        gameSpeed *= 1.2; // Increase the speed by 20% each level
         pointB.style.top = `${Math.random() * (gameArea.offsetHeight - 20)}px`;
         pointB.style.right = `${Math.random() * (gameArea.offsetWidth - 20)}px`;
+        piecesSpawned = 0;
         spawnPiece();
     }
 
