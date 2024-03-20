@@ -80,3 +80,9 @@ body {
     position: absolute;
     background-color: gray;
 }
+
+.monster {
+    position: absolute;
+    background-color: orange;
+    border-radius: 50%;
+}

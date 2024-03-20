@@ -29,8 +29,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let isInvincible = false;
     let invincibilityTimeout;
     let levelTimeout;
-    let timeRemaining = 10000;
+    let timeRemaining = 5000;
     let highScore = 0;
+    let monster = null;
+    let monsterSpeed = 1;
+    let startTime;
+    let elapsedTime = 0;
 
     createPlayer();
     spawnPiece();
@@ -258,8 +262,70 @@ document.addEventListener('DOMContentLoaded', () => {
         spawnSpikes();
         spawnPowerUps();
         spawnPlatforms();
-        timeRemaining = 30;
         startTimer();
+
+
+        if (monster) {
+            gameArea.removeChild(monster);
+        }
+        createMonster();
+        
+        startTime = Date.now();
+        elapsedTime = 0;
+        timeRemaining = 30 / gameSpeed;
+        updateTimer();
+    }
+
+    function createMonster() {
+        monster = document.createElement('div');
+        monster.className = 'monster';
+        monster.style.position = 'absolute';
+        monster.style.width = '30px';
+        monster.style.height = '30px';
+        monster.style.backgroundColor = 'orange';
+        monster.style.left = `${Math.random() * (gameArea.offsetWidth - 30)}px`;
+        monster.style.bottom = `${Math.random() * (gameArea.offsetHeight - 30)}px`;
+        gameArea.appendChild(monster);
+    }
+
+    function updateMonster() {
+        const monsterRect = monster.getBoundingClientRect();
+        const playerRect = player.getBoundingClientRect();
+
+        let dx = playerRect.left - monsterRect.left;
+        let dy = playerRect.bottom - monsterRect.bottom;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        dx /= distance;
+        dy /= distance;
+
+        const newX = monsterRect.left + dx * monsterSpeed;
+        const newY = monsterRect.bottom + dy * monsterSpeed;
+
+        monster.style.left = `${newX}px`;
+        monster.style.bottom = `${newY}px`;
+    }
+
+    function checkPlayerCollidesWithMonster() {
+        if (isInvincible) return;
+
+        const playerRect = player.getBoundingClientRect();
+        const monsterRect = monster.getBoundingClientRect();
+
+        if (playerRect.right > monsterRect.left && playerRect.left < monsterRect.right &&
+            playerRect.bottom > monsterRect.top && playerRect.top < monsterRect.bottom) {
+            resetGame();
+        }
+    }
+
+    function updateTimer() {
+        elapsedTime = (Date.now() - startTime) / 1000;
+        timeRemaining = Math.max(0, 30 / gameSpeed - elapsedTime);
+        timerElement.textContent = `Time: ${timeRemaining.toFixed(1)}s`;
+
+        if (timeRemaining <= 0) {
+            resetGame();
+        }
     }
 
     function checkPlayerReachedPointB() {
@@ -469,6 +535,8 @@ document.addEventListener('DOMContentLoaded', () => {
         checkPlayerReachedPointB();
         checkPlayerCollidesWithSpike();
         checkPlayerCollidesPowerUp();
+        updateMonster();
+        checkPlayerCollidesWithMonster();
         updateTimer();
     }
 
