@@ -34,6 +34,21 @@ body {
 #score, #timer, #highScore {
     position: absolute;
     top: 10px;
+    font-size: 18px;
+    color: #000;
+}
+
+#score {
+    left: 10px;
+}
+
+#timer {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#highScore {
+    right: 10px;
 }
 
 #message {
@@ -53,4 +68,15 @@ body {
 .block {
     position: absolute;
     background-color: green;
+}
+
+.powerUp {
+    position: absolute;
+    background-color: yellow;
+    border-radius: 50%;
+}
+
+.platform {
+    position: absolute;
+    background-color: gray;
 }
