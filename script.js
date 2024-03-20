@@ -4,14 +4,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const pointB = document.getElementById('pointB');
     const scoreElement = document.getElementById('score');
     const messageElement = document.getElementById('message');
+    const timerElement = document.getElementById('timer');
+    const highScoreElement = document.getElementById('highScore');
     let playerX = 100, playerY = 10;
     let velocityY = 0;
     const gravity = -0.1;
-    const jumpVelocity = 5;
+    let jumpVelocity = 5;
     const playerHeight = 20;
     const playerWidth = 20;
     let tetrisPieces = [];
     let spikes = [];
+    let powerUps = [];
+    let platforms = [];
     let isOnGround = false;
     let moveRight = false;
     let moveLeft = false;
@@ -22,10 +26,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let score = 0;
     let gameSpeed = 1;
     let piecesSpawned = 0;
-    
+    let isInvincible = false;
+    let invincibilityTimeout;
+    let levelTimeout;
+    let timeRemaining = 30;
+    let highScore = 0;
+
     createPlayer();
     spawnPiece();
     spawnSpikes();
+    spawnPowerUps();
+    spawnPlatforms();
+    startTimer();
 
     function createPlayer() {
         player.style.width = `${playerWidth}px`;
@@ -44,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
             piecesSpawned++;
         }
     }
+
 
     function createTetrisPiece() {
         const shapes = ['I', 'L', 'T', 'Z', 'O'];
@@ -227,12 +240,26 @@ document.addEventListener('DOMContentLoaded', () => {
             gameArea.removeChild(spike);
         });
         spikes = [];
+        powerUps.forEach(powerUp => {
+            gameArea.removeChild(powerUp.element);
+        });
+        powerUps = [];
+        platforms.forEach(platform => {
+            gameArea.removeChild(platform.element);
+        });
+        platforms = [];
         gameSpeed *= 1.2;
         piecesSpawned = 0;
+        isInvincible = false;
+        clearTimeout(invincibilityTimeout);
         pointB.style.top = `${Math.min(Math.random() * (gameArea.offsetHeight * 0.2), gameArea.offsetHeight * 0.2)}px`;
         pointB.style.right = `${Math.random() * (gameArea.offsetWidth - 20)}px`;
         spawnPiece();
         spawnSpikes();
+        spawnPowerUps();
+        spawnPlatforms();
+        timeRemaining = 30;
+        startTimer();
     }
 
     function checkPlayerReachedPointB() {
@@ -243,6 +270,10 @@ document.addEventListener('DOMContentLoaded', () => {
             showSuccessMessage();
             score++;
             scoreElement.textContent = `Score: ${score}`;
+            if (score > highScore) {
+                highScore = score;
+                highScoreElement.textContent = `High Score: ${highScore}`;
+            }
             resetGame();
         }
     }
@@ -279,6 +310,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function checkPlayerCollidesWithSpike() {
+        if (isInvincible) return;
+
         const playerRect = player.getBoundingClientRect();
         for (let spike of spikes) {
             const spikeRect = spike.getBoundingClientRect();
@@ -287,6 +320,110 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetGame();
                 break;
             }
+        }
+    }
+
+    function spawnPowerUps() {
+        const numPowerUps = Math.floor(Math.random() * 2) + 1;
+        for (let i = 0; i < numPowerUps; i++) {
+            const powerUp = document.createElement('div');
+            powerUp.className = 'powerUp';
+            powerUp.style.position = 'absolute';
+            powerUp.style.width = '20px';
+            powerUp.style.height = '20px';
+            powerUp.style.backgroundColor = 'yellow';
+            powerUp.style.left = `${Math.random() * (gameArea.offsetWidth - 20)}px`;
+            powerUp.style.bottom = `${Math.random() * (gameArea.offsetHeight - 20)}px`;
+            gameArea.appendChild(powerUp);
+            powerUps.push({
+                element: powerUp,
+                type: Math.random() < 0.5 ? 'jump' : 'invincibility'
+            });
+        }
+    }
+
+    function checkPlayerCollidesPowerUp() {
+        const playerRect = player.getBoundingClientRect();
+        for (let i = 0; i < powerUps.length; i++) {
+            const powerUpRect = powerUps[i].element.getBoundingClientRect();
+            if (playerRect.right > powerUpRect.left && playerRect.left < powerUpRect.right &&
+                playerRect.bottom > powerUpRect.top && playerRect.top < powerUpRect.bottom) {
+                activatePowerUp(powerUps[i].type);
+                gameArea.removeChild(powerUps[i].element);
+                powerUps.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    function activatePowerUp(type) {
+        if (type === 'jump') {
+            jumpVelocity = 8;
+            setTimeout(() => {
+                jumpVelocity = 5;
+            }, 5000);
+        } else if (type === 'invincibility') {
+            isInvincible = true;
+            player.style.backgroundColor = 'orange';
+            invincibilityTimeout = setTimeout(() => {
+                isInvincible = false;
+                player.style.backgroundColor = 'blue';
+            }, 5000);
+        }
+    }
+
+    function spawnPlatforms() {
+        const numPlatforms = Math.floor(Math.random() * 3) + 1;
+        for (let i = 0; i < numPlatforms; i++) {
+            const platform = document.createElement('div');
+            platform.className = 'platform';
+            platform.style.position = 'absolute';
+            platform.style.width = '80px';
+            platform.style.height = '10px';
+            platform.style.backgroundColor = 'gray';
+            platform.style.left = `${Math.random() * (gameArea.offsetWidth - 80)}px`;
+            platform.style.bottom = `${Math.random() * (gameArea.offsetHeight - 20)}px`;
+            gameArea.appendChild(platform);
+            platforms.push({
+                element: platform,
+                x: parseFloat(platform.style.left),
+                y: parseFloat(platform.style.bottom),
+                width: 80,
+                height: 10,
+                speed: Math.random() * 2 + 1
+            });
+        }
+    }
+
+    function updatePlatforms() {
+        platforms.forEach(platform => {
+            platform.x += platform.speed;
+            if (platform.x > gameArea.offsetWidth) {
+                platform.x = -platform.width;
+            }
+            platform.element.style.left = `${platform.x}px`;
+        });
+    }
+
+    function onTopOfPlatform(playerX, playerY, platform) {
+        return playerX + playerWidth > platform.x &&
+               playerX < platform.x + platform.width &&
+               playerY <= platform.y + platform.height &&
+               playerY + playerHeight > platform.y;
+    }
+
+    function startTimer() {
+        timerElement.textContent = `Time: ${timeRemaining}s`;
+        levelTimeout = setTimeout(() => {
+            resetGame();
+        }, timeRemaining * 1000);
+    }
+
+    function updateTimer() {
+        timeRemaining--;
+        timerElement.textContent = `Time: ${timeRemaining}s`;
+        if (timeRemaining <= 0) {
+            resetGame();
         }
     }
 
@@ -308,6 +445,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        for (let platform of platforms) {
+            if (onTopOfPlatform(newX, newY, platform)) {
+                canMoveY = false;
+                newY = platform.y + platform.height;
+                velocityY = 0;
+                isOnGround = true;
+                break;
+            }
+        }
+
         if (canMoveY) {
             playerY = newY >= 0 ? newY : 0;
             isOnGround = playerY === 0;
@@ -318,8 +465,11 @@ document.addEventListener('DOMContentLoaded', () => {
         player.style.bottom = `${playerY}px`;
 
         updateTetrisPieces();
+        updatePlatforms();
         checkPlayerReachedPointB();
         checkPlayerCollidesWithSpike();
+        checkPlayerCollidesPowerUp();
+        updateTimer();
     }
 
     function keydownHandler(e) {
@@ -345,38 +495,38 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'w':
                 rotatePiece = true;
                 break;
-                case 's':
-                    speedUp = true;
-                    break;
-            }
+            case 's':
+                speedUp = true;
+                break;
         }
+    }
 
-        function keyupHandler(e) {
-            switch (e.key) {
-                case 'ArrowRight':
-                    moveRight = false;
-                    break;
-                case 'ArrowLeft':
-                    moveLeft = false;
-                    break;
-                case 'a':
-                    movePieceLeft = false;
-                    break;
-                case 'd':
-                    movePieceRight = false;
-                    break;
-                case 'w':
-                    rotatePiece = false;
-                    tetrisPieces.forEach(piece => piece.rotated = false);
-                    break;
-                case 's':
-                    speedUp = false;
-                    break;
-            }
+    function keyupHandler(e) {
+        switch (e.key) {
+            case 'ArrowRight':
+                moveRight = false;
+                break;
+            case 'ArrowLeft':
+                moveLeft = false;
+                break;
+            case 'a':
+                movePieceLeft = false;
+                break;
+            case 'd':
+                movePieceRight = false;
+                break;
+            case 'w':
+                rotatePiece = false;
+                tetrisPieces.forEach(piece => piece.rotated = false);
+                break;
+            case 's':
+                speedUp = false;
+                break;
         }
+    }
 
-        document.addEventListener('keydown', keydownHandler);
-        document.addEventListener('keyup', keyupHandler);
+    document.addEventListener('keydown', keydownHandler);
+    document.addEventListener('keyup', keyupHandler);
 
-        setInterval(update, 10);
-    });
+    setInterval(update, 10);
+});

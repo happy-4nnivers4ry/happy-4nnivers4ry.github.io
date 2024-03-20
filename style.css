@@ -20,24 +20,20 @@ body {
     background-color: purple;
 }
 
-
-#player, #pointA, #pointB {
+#player, #pointB {
     position: absolute;
     width: 20px;
     height: 20px;
-    background-color: red;
-}
-
-#player {
     background-color: blue;
 }
 
-#score {
+#pointB {
+    background-color: red;
+}
+
+#score, #timer, #highScore {
     position: absolute;
     top: 10px;
-    left: 10px;
-    font-size: 18px;
-    color: #000;
 }
 
 #message {
