@@ -7,10 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let playerX = 100, playerY = 10;
     let velocityY = 0;
     const gravity = -0.1;
-    const jumpVelocity = 7;
+    const jumpVelocity = 5;
     const playerHeight = 20;
     const playerWidth = 20;
     let tetrisPieces = [];
+    let spikes = [];
     let isOnGround = false;
     let moveRight = false;
     let moveLeft = false;
@@ -24,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     createPlayer();
     spawnPiece();
+    spawnSpikes();
 
     function createPlayer() {
         player.style.width = `${playerWidth}px`;
@@ -130,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
             shape: pieceShape
         });
     }
-    
 
     function rotateTetrisPiece(piece) {
         const newShape = [];
@@ -173,7 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
         piece.element.style.width = `${piece.width}px`;
         piece.element.style.height = `${piece.height}px`;
     }
-    
 
     function updateTetrisPieces() {
         tetrisPieces.forEach(piece => {
@@ -204,7 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
             spawnPiece();
         }
     }
-    
 
     function intersectsAnyPiece(currentPiece) {
         return tetrisPieces.some(piece => {
@@ -224,11 +223,16 @@ document.addEventListener('DOMContentLoaded', () => {
             gameArea.removeChild(piece.element);
         });
         tetrisPieces = [];
-        gameSpeed *= 1.2; // Increase the speed by 20% each level
+        spikes.forEach(spike => {
+            gameArea.removeChild(spike);
+        });
+        spikes = [];
+        gameSpeed *= 1.2;
         piecesSpawned = 0;
-        pointB.style.top = `${Math.random() * (gameArea.offsetHeight - 20)}px`;
+        pointB.style.top = `${Math.max(Math.random() * (gameArea.offsetHeight - 100), 100)}px`;
         pointB.style.right = `${Math.random() * (gameArea.offsetWidth - 20)}px`;
         spawnPiece();
+        spawnSpikes();
     }
 
     function checkPlayerReachedPointB() {
@@ -242,7 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
             resetGame();
         }
     }
-    
 
     function showSuccessMessage() {
         messageElement.textContent = 'Success!';
@@ -257,6 +260,34 @@ document.addEventListener('DOMContentLoaded', () => {
                playerX < piece.x + piece.width &&
                playerY <= piece.y + piece.height &&
                playerY + playerHeight > piece.y;
+    }
+
+    function spawnSpikes() {
+        const numSpikes = Math.floor(Math.random() * 2) + 1;
+        for (let i = 0; i < numSpikes; i++) {
+            const spike = document.createElement('div');
+            spike.className = 'spike';
+            spike.style.position = 'absolute';
+            spike.style.width = '20px';
+            spike.style.height = '20px';
+            spike.style.backgroundColor = 'red';
+            spike.style.left = `${Math.random() * (gameArea.offsetWidth - 20)}px`;
+            spike.style.bottom = `${Math.random() * (gameArea.offsetHeight - 20)}px`;
+            gameArea.appendChild(spike);
+            spikes.push(spike);
+        }
+    }
+
+    function checkPlayerCollidesWithSpike() {
+        const playerRect = player.getBoundingClientRect();
+        for (let spike of spikes) {
+            const spikeRect = spike.getBoundingClientRect();
+            if (playerRect.right > spikeRect.left && playerRect.left < spikeRect.right &&
+                playerRect.bottom > spikeRect.top && playerRect.top < spikeRect.bottom) {
+                resetGame();
+                break;
+            }
+        }
     }
 
     function update() {
@@ -288,6 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateTetrisPieces();
         checkPlayerReachedPointB();
+        checkPlayerCollidesWithSpike();
     }
 
     function keydownHandler(e) {
@@ -313,38 +345,38 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'w':
                 rotatePiece = true;
                 break;
-            case 's':
-                speedUp = true;
-                break;
+                case 's':
+                    speedUp = true;
+                    break;
+            }
         }
-    }
 
-    function keyupHandler(e) {
-        switch (e.key) {
-            case 'ArrowRight':
-                moveRight = false;
-                break;
-            case 'ArrowLeft':
-                moveLeft = false;
-                break;
-            case 'a':
-                movePieceLeft = false;
-                break;
-            case 'd':
-                movePieceRight = false;
-                break;
-            case 'w':
-                rotatePiece = false;
-                tetrisPieces.forEach(piece => piece.rotated = false);
-                break;
-            case 's':
-                speedUp = false;
-                break;
+        function keyupHandler(e) {
+            switch (e.key) {
+                case 'ArrowRight':
+                    moveRight = false;
+                    break;
+                case 'ArrowLeft':
+                    moveLeft = false;
+                    break;
+                case 'a':
+                    movePieceLeft = false;
+                    break;
+                case 'd':
+                    movePieceRight = false;
+                    break;
+                case 'w':
+                    rotatePiece = false;
+                    tetrisPieces.forEach(piece => piece.rotated = false);
+                    break;
+                case 's':
+                    speedUp = false;
+                    break;
+            }
         }
-    }
 
-    document.addEventListener('keydown', keydownHandler);
-    document.addEventListener('keyup', keyupHandler);
+        document.addEventListener('keydown', keydownHandler);
+        document.addEventListener('keyup', keyupHandler);
 
-    setInterval(update, 10);
-});
+        setInterval(update, 10);
+    });
